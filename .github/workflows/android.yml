@@ -29,7 +29,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: android-actions/setup-android@v3
+      # the ubuntu runners already ship the Android SDK ($ANDROID_HOME), so it only needs its licenses accepted
+      # (android-actions/setup-android crashes on the newest cmdline-tools, "Failed to find package 'tools'")
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - uses: gradle/actions/setup-gradle@v4
         with:
