@@ -74,6 +74,8 @@ const result = await page.evaluate(async () => {
     window.close()
     out.calls = window.__bridgeCalls.map((c) => c[0])
 
+    out.vp9Blocked = !MediaSource.isTypeSupported('video/webm; codecs="vp09.00.10.08"')
+    out.av1Blocked = !MediaSource.isTypeSupported('video/mp4; codecs="av01.0.05M.08"')
     out.userAgentData = navigator.userAgentData?.platform
     return out
 })
@@ -86,6 +88,6 @@ for (const e of errors) console.log(e)
 
 await browser.close()
 
-const failed = !result.loaded || !result.adPlacementsRemoved || !result.adSlotsRemoved || !result.videoKept || result.backKeyCode !== 32769 || errors.length > 0
+const failed = !result.loaded || !result.adPlacementsRemoved || !result.adSlotsRemoved || !result.videoKept || result.backKeyCode !== 32769 || !result.vp9Blocked || !result.av1Blocked || errors.length > 0
 console.log(failed ? 'SMOKE FAILED' : 'SMOKE OK')
 process.exit(failed ? 1 : 0)

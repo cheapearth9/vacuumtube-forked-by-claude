@@ -215,6 +215,7 @@ function configDefaults() {
 
     return {
         ...defaults,
+        h264ify: true, //phones and tv boxes often can't decode the vp9/av1 streams youtube prefers, which ends in "Something went wrong". h264 plays everywhere
         //the desktop-only things that make no sense in the android app
         device_discoverability: false, //DIAL casting needs raw sockets
         auto_update: false,

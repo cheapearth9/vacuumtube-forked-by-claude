@@ -25,6 +25,7 @@ final class Bridge {
     private static final String TAG = "VacuumTube";
     private static final String PREFS = "vacuumtube";
     private static final String KEY_CONFIG = "config";
+    private static final String KEY_DEFAULTS_VERSION = "defaults_version";
     private static final String GENERATE = "__GENERATE__";
 
     private final MainActivity activity;
@@ -50,6 +51,12 @@ final class Bridge {
         }
 
         try {
+            // one-time migration for installs that saved the old defaults: playback fails on many devices without h264
+            if (prefs.getInt(KEY_DEFAULTS_VERSION, 1) < 2) {
+                merged.put("h264ify", true);
+                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 2).apply();
+            }
+
             if (GENERATE.equals(merged.optString("sponsorblock_uuid"))) {
                 merged.put("sponsorblock_uuid", UUID.randomUUID().toString()); // sponsorblock wants a stable per-user id
                 prefs.edit().putString(KEY_CONFIG, merged.toString()).apply();
