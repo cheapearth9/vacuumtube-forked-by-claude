@@ -28,13 +28,13 @@ function parse(json, fallback) {
 function appInfo() {
     const info = parse(bridge.getAppInfo(), {});
     return {
-        status: 'unsupported',
+        status: 'idle', //the about page's "Check now" button asks the app to check, which shows the update menu itself
         currentVersion: info.version || '',
         latestVersion: '',
         platform: 'Android',
         arch: info.arch || 'arm64',
         installationType: 'application',
-        canAutoUpdate: false,
+        canAutoUpdate: true, //only changes the wording on the about page ("Automatic installer")
         progress: null
     };
 }
@@ -51,7 +51,7 @@ const handlers = {
     'open-userstyles-folder': () => {},
     'request-microphone-permission': () => bridge.requestMicrophone(),
     'get-about-info': () => appInfo(),
-    'check-for-updates': () => appInfo(),
+    'check-for-updates': () => { bridge.checkForUpdates(); return appInfo(); },
     'download-update': () => appInfo(),
     'install-update': () => {},
     'open-project-page': () => { bridge.openExternal('https://github.com/shy1132/VacuumTube'); },

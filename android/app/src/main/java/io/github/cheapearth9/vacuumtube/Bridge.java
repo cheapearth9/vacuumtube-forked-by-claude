@@ -112,6 +112,16 @@ final class Bridge {
     }
 
     @JavascriptInterface
+    public void checkForUpdates() {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                activity.checkForUpdates(true);
+            }
+        });
+    }
+
+    @JavascriptInterface
     public String getDeviceName() {
         return Build.MODEL != null ? Build.MODEL : "Android TV";
     }

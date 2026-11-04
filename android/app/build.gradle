@@ -2,6 +2,11 @@ plugins {
     id 'com.android.application'
 }
 
+//the version follows upstream VacuumTube's package.json, so merging upstream bumps it automatically
+def upstream = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def buildNumber = (project.findProperty('buildNumber') ?: '1').toInteger() //CI passes its run number, so every build is newer than the last
+def updateRepo = project.findProperty('updateRepo') ?: 'cheapearth9/vacuumtube-forked-by-claude' //where the app looks for updates
+
 android {
     namespace 'io.github.cheapearth9.vacuumtube'
     compileSdk 34
@@ -10,14 +15,30 @@ android {
         applicationId 'io.github.cheapearth9.vacuumtube'
         minSdk 21 //android 5.0. youtube tv needs a modern chromium, which android's updatable webview only provides from here on
         targetSdk 34
-        versionCode 1
-        versionName '2.0.2-tv1' //upstream VacuumTube version + android build
+        versionCode buildNumber
+        versionName "${upstream.version}-tv"
+        buildConfigField 'String', 'UPDATE_REPO', "\"${updateRepo}\""
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    signingConfigs {
+        //a fixed key (committed on purpose): android only installs an update over an app signed with the same key,
+        //and CI would otherwise generate a new random debug key on every run
+        release {
+            storeFile file('../vacuumtube.keystore')
+            storePassword 'vacuumtube'
+            keyAlias 'vacuumtube'
+            keyPassword 'vacuumtube'
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.debug //sideload-only app, the debug key is fine
+            signingConfig signingConfigs.release
         }
     }
 
@@ -29,6 +50,10 @@ android {
     lint {
         abortOnError false
     }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1' //FileProvider, for handing the downloaded update to the installer
 }
 
 //the injected script is generated from the upstream modules by android/build-js.mjs, make sure it exists before packaging

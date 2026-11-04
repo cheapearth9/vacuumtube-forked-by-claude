@@ -42,7 +42,7 @@ jobs:
         run: node android/build-js.mjs
 
       - name: Build the APK
-        run: gradle --no-daemon -p android :app:assembleRelease
+        run: gradle --no-daemon -p android :app:assembleRelease -PbuildNumber=${{ github.run_number }} -PupdateRepo=${{ github.repository }}
 
       - name: Keep the APK as a workflow artifact
         uses: actions/upload-artifact@v4
@@ -56,9 +56,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp android/app/build/outputs/apk/release/app-release.apk VacuumTube-AndroidTV.apk
+
+          # what the app's update check reads: a newer versionCode than the installed one triggers the update menu
+          VERSION="$(node -p "require('./package.json').version")-tv"
+          cat > update.json <<JSON
+          {
+            "versionCode": ${{ github.run_number }},
+            "versionName": "$VERSION",
+            "apk": "https://github.com/${{ github.repository }}/releases/download/android-latest/VacuumTube-AndroidTV.apk"
+          }
+          JSON
+          cat update.json
+
           gh release delete android-latest --cleanup-tag --yes || true
-          gh release create android-latest VacuumTube-AndroidTV.apk \
+          gh release create android-latest VacuumTube-AndroidTV.apk update.json \
             --prerelease \
             --target "$GITHUB_SHA" \
             --title "VacuumTube for Android TV (latest build)" \
-            --notes "Sideload VacuumTube-AndroidTV.apk onto your Android TV (Android 5.0 or newer). Built from commit ${GITHUB_SHA::7}."
+            --notes "Sideload VacuumTube-AndroidTV.apk onto your Android TV (Android 5.0 or newer). Build ${{ github.run_number }}, commit ${GITHUB_SHA::7}. Installed copies offer this update on their own."

@@ -31,7 +31,13 @@ It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen We
 | Casting from your phone to the TV (DIAL) | **No** (a WebView has no raw sockets) |
 | Custom CSS folder, auto-update, window options | **No** (desktop-only) |
 
-To update, download a newer APK from the releases page and install it over the old one.
+## Updates
+
+**In the app:** a few seconds after launch (at most every 6 hours) the app checks this repo's release. If a newer build exists, a menu pops up with **Update**, **Later** and **Skip this version**. *Update* downloads the APK and opens Android's installer, which asks for the final OK. The first time, Android also asks you to allow VacuumTube to install apps. You can check by hand from VacuumTube settings, then About, then *Check now*.
+
+**One-time reinstall:** builds before the first one with updates were signed with a temporary key. If you installed one of those, uninstall it once before installing the new one (Android refuses to update across different keys). After that, updates install over the top and keep your login and settings.
+
+**Staying current with VacuumTube:** a scheduled GitHub Action ([`sync-upstream.yml`](.github/workflows/sync-upstream.yml)) merges new upstream commits every day and rebuilds the APK, which your TV then offers as an update. If an upstream change can't be merged automatically, or needs a new Android shim, the run fails and shows up in the Actions tab for a manual fix.
 
 ## How it works
 
@@ -59,5 +65,5 @@ gradle -p android :app:assembleRelease     # Gradle 8.9 or newer
 ## Notes
 
 - Not affiliated with or endorsed by YouTube or Google. Using a modified client may be against YouTube's terms of service. Use it at your own risk.
-- The APK is signed with the debug key, so it's for sideloading only.
+- The APK is signed with a key that is committed in this repo ([`android/vacuumtube.keystore`](android/vacuumtube.keystore)) so that updates install over each other. It's a sideload-only app and the key is not secret, so only install APKs you got from this repo's releases.
 - Licensed under the MIT License, same as upstream. See [LICENSE](LICENSE).

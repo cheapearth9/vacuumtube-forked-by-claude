@@ -79,6 +79,8 @@ public class MainActivity extends Activity {
     private WebView webView;
     private String userAgent;
     private byte[] bundle;
+    private Updater updater;
+    private boolean updateCheckScheduled;
     private PermissionRequest pendingPermission;
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -117,6 +119,7 @@ public class MainActivity extends Activity {
         cookies.setAcceptCookie(true);
         cookies.setAcceptThirdPartyCookies(webView, true);
 
+        updater = new Updater(this);
         webView.addJavascriptInterface(new Bridge(this), "AndroidBridge");
         webView.setWebViewClient(new TvClient());
         webView.setWebChromeClient(new TvChrome());
@@ -129,6 +132,22 @@ public class MainActivity extends Activity {
     }
 
     // ---- called by the bridge (on the UI thread) ----
+
+    int versionCode() {
+        try {
+            android.content.pm.PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return Build.VERSION.SDK_INT >= 28 ? (int) info.getLongVersionCode() : info.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            return 0;
+        }
+    }
+
+    void checkForUpdates(boolean manual) {
+        if (updater == null) return;
+
+        if (manual) updater.check(true);
+        else updater.checkIfDue();
+    }
 
     String versionName() {
         try {
@@ -195,6 +214,12 @@ public class MainActivity extends Activity {
                         else finish();
                     }
                 });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (updater != null) updater.resumePendingInstall();
     }
 
     @Override
@@ -402,6 +427,16 @@ public class MainActivity extends Activity {
             CookieManager.getInstance().flush();
 
             if (url == null || !url.startsWith(TV_URL)) return;
+
+            if (!updateCheckScheduled) { // look for a new version once the app has settled, so it never slows the start
+                updateCheckScheduled = true;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkForUpdates(false);
+                    }
+                }, 8000);
+            }
 
             // the page loaded without our tag (the fetch above failed), so inject late: not as clean, but better than nothing
             view.evaluateJavascript("window.__vtLoaded===true", value -> {
