@@ -2,6 +2,7 @@ name: Android TV APK
 
 on:
   push:
+    branches: [main] #just main, so a push to another branch doesn't start a second build that races the first for the release
     paths:
       - 'android/**'
       - 'src/preload/**'

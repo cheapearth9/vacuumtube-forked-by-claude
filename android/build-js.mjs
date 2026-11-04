@@ -17,6 +17,7 @@ const VIRTUAL_ROOT = '/vt'
 
 const SKIP_MODULES = new Set([ 'no-f11' ]) //desktop only
 const REPLACE_MODULES = { h5vcc: 'android/js/h5vcc-android.js' }
+const EXTRA_MODULES = { 'android-diagnostics': 'android/js/diagnostics.js' } //android only additions
 
 const ALIASES = {
     electron: 'android/js/shims/electron.js',
@@ -78,6 +79,10 @@ function entrySource() {
         else if (entry.name.endsWith('.js')) file = `src/preload/modules/${entry.name}`
         else continue;
 
+        loaders.push(`[ ${JSON.stringify(name)}, () => require(${JSON.stringify('../../' + file)}) ]`)
+    }
+
+    for (const [ name, file ] of Object.entries(EXTRA_MODULES)) {
         loaders.push(`[ ${JSON.stringify(name)}, () => require(${JSON.stringify('../../' + file)}) ]`)
     }
 

@@ -487,20 +487,27 @@ public class MainActivity extends Activity {
             boolean fromYouTube = origin != null && "www.youtube.com".equals(origin.getHost());
 
             boolean wantsMicrophone = false;
+            boolean wantsProtectedMedia = false;
             for (String resource : request.getResources()) {
                 if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) wantsMicrophone = true;
+                if (PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID.equals(resource)) wantsProtectedMedia = true;
             }
 
-            if (!fromYouTube || !wantsMicrophone) { // voice search is the only thing that's allowed
+            // only youtube, and only for what it needs: voice search, and the DRM identifier that protected (encrypted) streams use
+            if (!fromYouTube || (!wantsMicrophone && !wantsProtectedMedia)) {
                 request.deny();
                 return;
             }
 
-            if (hasMicrophonePermission()) {
-                request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+            if (wantsMicrophone) {
+                if (hasMicrophonePermission()) {
+                    request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+                } else {
+                    pendingPermission = request;
+                    askForMicrophone();
+                }
             } else {
-                pendingPermission = request;
-                askForMicrophone();
+                request.grant(new String[]{PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID});
             }
         }
     }
