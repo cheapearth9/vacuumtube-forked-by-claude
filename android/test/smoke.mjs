@@ -76,8 +76,6 @@ const result = await page.evaluate(async () => {
 
     JSON.parse('{"playabilityStatus":{"status":"LOGIN_REQUIRED","reason":"Sign in to continue"}}')
     out.diagnostic = [ ...document.querySelectorAll('div') ].map((d) => d.textContent).find((t) => t.startsWith('playability:')) || null
-    out.vp9Blocked = !MediaSource.isTypeSupported('video/webm; codecs="vp09.00.10.08"')
-    out.av1Blocked = !MediaSource.isTypeSupported('video/mp4; codecs="av01.0.05M.08"')
     out.userAgentData = navigator.userAgentData?.platform
     return out
 })
@@ -90,6 +88,6 @@ for (const e of errors) console.log(e)
 
 await browser.close()
 
-const failed = !result.loaded || !result.adPlacementsRemoved || !result.adSlotsRemoved || !result.videoKept || result.backKeyCode !== 32769 || !result.vp9Blocked || !result.diagnostic || !result.av1Blocked || errors.length > 0
+const failed = !result.loaded || !result.adPlacementsRemoved || !result.adSlotsRemoved || !result.videoKept || result.backKeyCode !== 32769 || !result.diagnostic || errors.length > 0
 console.log(failed ? 'SMOKE FAILED' : 'SMOKE OK')
 process.exit(failed ? 1 : 0)

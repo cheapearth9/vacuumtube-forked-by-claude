@@ -51,10 +51,11 @@ final class Bridge {
         }
 
         try {
-            // one-time migration for installs that saved the old defaults: playback fails on many devices without h264
-            if (prefs.getInt(KEY_DEFAULTS_VERSION, 1) < 2) {
-                merged.put("h264ify", true);
-                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 2).apply();
+            // builds 8 and 9 turned h264ify on for everyone, which also blocked 4k (vp9/av1): put it back to the default once
+            int version = prefs.getInt(KEY_DEFAULTS_VERSION, 1);
+            if (version < 3) {
+                if (version == 2) merged.put("h264ify", false);
+                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 3).apply();
             }
 
             if (GENERATE.equals(merged.optString("sponsorblock_uuid"))) {
