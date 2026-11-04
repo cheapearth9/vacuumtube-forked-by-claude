@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.github.cheapearth9.vacuumtube'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'io.github.cheapearth9.vacuumtube'
+        minSdk 21 //android 5.0. youtube tv needs a modern chromium, which android's updatable webview only provides from here on
+        targetSdk 34
+        versionCode 1
+        versionName '2.0.2-tv1' //upstream VacuumTube version + android build
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug //sideload-only app, the debug key is fine
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+//the injected script is generated from the upstream modules by android/build-js.mjs, make sure it exists before packaging
+tasks.register('checkInjectedScript') {
+    doFirst {
+        if (!file('src/main/assets/vacuumtube.js').exists()) {
+            throw new GradleException('assets/vacuumtube.js is missing, run "node android/build-js.mjs" first')
+        }
+    }
+}
+
+tasks.configureEach { task ->
+    if (task.name == 'preBuild') task.dependsOn 'checkInjectedScript'
+}
