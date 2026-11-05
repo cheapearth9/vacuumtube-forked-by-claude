@@ -32,6 +32,20 @@ await page.addInitScript((defaults) => {
     }
 }, defaults)
 
+
+//LEGACY=1 removes what chrome 52 doesn't have, so the polyfills have to carry the bundle
+if (process.env.LEGACY) {
+    await page.addInitScript(() => {
+        const kill = (obj, names) => names.forEach((n) => { try { delete obj[n] } catch {} })
+        kill(Object, [ 'entries', 'values', 'fromEntries', 'hasOwn' ])
+        kill(String.prototype, [ 'padStart', 'padEnd', 'trimStart', 'trimEnd', 'replaceAll', 'at' ])
+        kill(Array.prototype, [ 'at', 'flat', 'flatMap' ])
+        kill(Promise.prototype, [ 'finally' ])
+        kill(window, [ 'globalThis', 'queueMicrotask' ])
+        for (const proto of [ Element.prototype, Document.prototype, DocumentFragment.prototype ]) kill(proto, [ 'append', 'prepend', 'replaceChildren' ])
+        window.__legacyActive = typeof Object.entries === 'undefined' && typeof ''.padStart === 'undefined' && typeof [].flat === 'undefined'
+    })
+}
 await page.goto('https://www.youtube.com/tv')
 await page.waitForFunction(() => typeof window.vtOpenSettingsOverlay === 'function', null, { timeout: 8000 })
 

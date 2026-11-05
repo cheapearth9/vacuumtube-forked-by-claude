@@ -29,11 +29,13 @@ final class Bridge {
     private static final String GENERATE = "__GENERATE__";
 
     private final MainActivity activity;
+    private final int webViewMajor; // 0 when unknown
     private final SharedPreferences prefs;
     private final JSONObject config;
 
-    Bridge(MainActivity activity) {
+    Bridge(MainActivity activity, int webViewMajor) {
         this.activity = activity;
+        this.webViewMajor = webViewMajor;
         this.prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         this.config = loadConfig();
     }
@@ -52,10 +54,10 @@ final class Bridge {
 
         try {
             int version = prefs.getInt(KEY_DEFAULTS_VERSION, 1);
-            if (version < 4) {
+            if (version < 5) {
                 if (version == 2) merged.put("h264ify", false); // builds 8 and 9 turned it on for everyone, which also blocked 4k
                 applyDeviceDefaults(merged);
-                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 4).apply();
+                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 5).apply();
             }
 
             if (GENERATE.equals(merged.optString("sponsorblock_uuid"))) {
@@ -89,7 +91,7 @@ final class Bridge {
             }
         }
 
-        if (Devices.isLowEnd(activity) && !config.optBoolean("low_memory_mode", false)) {
+        if ((Devices.isLowEnd(activity) || (webViewMajor > 0 && webViewMajor < 90)) && !config.optBoolean("low_memory_mode", false)) {
             config.put("low_memory_mode", true);
         }
     }

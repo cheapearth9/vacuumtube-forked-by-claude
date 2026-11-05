@@ -129,7 +129,13 @@ public class MainActivity extends Activity {
         cookies.setAcceptThirdPartyCookies(webView, true);
 
         updater = new Updater(this);
-        bridge = new Bridge(this);
+        int chromeMajor = 0;
+        try {
+            chromeMajor = Integer.parseInt(webViewChrome);
+        } catch (NumberFormatException ignored) {
+        }
+
+        bridge = new Bridge(this, chromeMajor);
         webView.addJavascriptInterface(bridge, "AndroidBridge");
         webView.setWebViewClient(new TvClient());
         webView.setWebChromeClient(new TvChrome());
@@ -216,7 +222,13 @@ public class MainActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
-    /** The back button can't reach the page as a key event, so the injected script synthesizes cobalt's back key. */
+    private boolean backCheckPending;
+
+    /**
+     * Back is sent to the page (as cobalt's back key, or a real Escape key when the scripts aren't running).
+     * If nothing at all changed on the page afterwards, there was nowhere left to go back to (the home screen's exit
+     * prompt, the sign-in screen...), so that press exits the app: keep pressing Back and the last press leaves.
+     */
     private void goBack() {
         String url = webView.getUrl();
         if (url == null || !url.startsWith(TV_URL)) {
@@ -224,15 +236,48 @@ public class MainActivity extends Activity {
             return;
         }
 
-        webView.evaluateJavascript(
-                "(function(){if(window.__vtBack){window.__vtBack();return true}return false})()",
-                value -> {
-                    if (!"true".equals(value)) { // the script isn't there: send a real escape key, which youtube treats as back
-                        long now = android.os.SystemClock.uptimeMillis();
-                        webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE, 0));
-                        webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ESCAPE, 0));
-                    }
-                });
+        final boolean startWatching = !backCheckPending;
+        backCheckPending = true;
+
+        // watch for any change on the page (and a changed address), then press back with the scripts' help if they run
+        String script = "(function(){"
+                + (startWatching
+                ? "var w=window.__vtWatch={changed:false,href:location.href,mo:null};"
+                + "w.mo=new MutationObserver(function(){w.changed=true});"
+                + "w.mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,characterData:true});"
+                : "")
+                + "if(window.__vtBack){window.__vtBack();return true}return false})()";
+
+        webView.evaluateJavascript(script, new android.webkit.ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+                if (!"true".equals(value)) { // the scripts aren't there: send a real escape key, which youtube treats as back
+                    long now = android.os.SystemClock.uptimeMillis();
+                    webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE, 0));
+                    webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ESCAPE, 0));
+                }
+            }
+        });
+
+        if (!startWatching) return; // a check from a moment ago is still running and will see this press too
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (webView == null) return;
+
+                webView.evaluateJavascript(
+                        "(function(){var w=window.__vtWatch;if(!w)return 'unknown';w.mo.disconnect();window.__vtWatch=null;"
+                                + "return (w.changed||location.href!==w.href)?'changed':'same'})()",
+                        new android.webkit.ValueCallback<String>() {
+                            @Override
+                            public void onReceiveValue(String value) {
+                                backCheckPending = false;
+                                if (value != null && value.contains("same") && !isFinishing()) finish();
+                            }
+                        });
+            }
+        }, 600);
     }
 
     @Override

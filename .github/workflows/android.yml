@@ -40,7 +40,15 @@ jobs:
           gradle-version: '8.9'
 
       - name: Bundle the VacuumTube modules for the webview
+        env:
+          # also rewrites the script for old webviews (e.g. Chrome 52 on some tv boxes can't parse modern javascript)
+          ESBUILD: npx --yes esbuild@0.28.2
         run: node android/build-js.mjs
+
+      - name: Check the script still parses as old javascript
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/acorn" acorn@8
+          node -e "require('$RUNNER_TEMP/acorn/node_modules/acorn').parse(require('fs').readFileSync('android/app/src/main/assets/vacuumtube.js', 'utf8'), { ecmaVersion: 2016 }); console.log('parses as ES2016')"
 
       - name: Build the APK
         run: gradle --no-daemon -p android :app:assembleRelease -PbuildNumber=${{ github.run_number }} -PupdateRepo=${{ github.repository }}

@@ -17,7 +17,7 @@ const VIRTUAL_ROOT = '/vt'
 
 const SKIP_MODULES = new Set([ 'no-f11' ]) //desktop only
 const REPLACE_MODULES = { h5vcc: 'android/js/h5vcc-android.js' }
-const EXTRA_MODULES = { 'android-diagnostics': 'android/js/diagnostics.js' } //android only additions
+const EXTRA_MODULES = { 'android-diagnostics': 'android/js/diagnostics.js', 'android-compat': 'android/js/compat.js' } //android only additions
 
 const ALIASES = {
     electron: 'android/js/shims/electron.js',
@@ -87,6 +87,7 @@ function entrySource() {
     }
 
     return `
+require('./polyfills.js')
 require('./preamble.js')
 
 if (location.host === 'www.youtube.com' && location.pathname === '/tv' && !window.__vtLoaded) {
@@ -238,5 +239,14 @@ fs.mkdirSync(assets, { recursive: true })
 const bundle = build()
 fs.writeFileSync(path.join(assets, 'vacuumtube.js'), bundle)
 fs.writeFileSync(path.join(assets, 'config-defaults.json'), JSON.stringify(configDefaults(), null, 2))
+
+//old webviews (a tv box can ship Chrome 52 from 2016) can't parse optional chaining, async/await, class fields and the like
+//if ESBUILD is set (e.g. "npx --yes esbuild@0.28.2", as in CI) the bundle is rewritten in place for those
+const bundlePath = path.join(assets, 'vacuumtube.js')
+if (process.env.ESBUILD) {
+    const { execSync } = await import('node:child_process')
+    execSync(`${process.env.ESBUILD} "${bundlePath}" --target=chrome52 --outfile="${bundlePath}" --allow-overwrite --log-level=warning`, { stdio: 'inherit' })
+    console.log('lowered the bundle for chrome 52')
+}
 
 console.log(`bundled ${modules.size} modules, ${(bundle.length / 1024).toFixed(0)} KiB -> ${rel(path.join(assets, 'vacuumtube.js'))}`)
