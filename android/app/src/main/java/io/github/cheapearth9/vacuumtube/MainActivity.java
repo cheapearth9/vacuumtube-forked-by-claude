@@ -1,6 +1,7 @@
 package io.github.cheapearth9.vacuumtube;
 
 import android.Manifest;
+import android.widget.Toast;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -80,6 +81,10 @@ public class MainActivity extends Activity {
     private String userAgent;
     private byte[] bundle;
     private Updater updater;
+    private Bridge bridge;
+    private String webViewChrome = "?";
+    private String lastScriptError;
+    private boolean statusShown;
     private boolean updateCheckScheduled;
     private PermissionRequest pendingPermission;
 
@@ -107,7 +112,11 @@ public class MainActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
+        java.util.regex.Matcher chrome = Pattern.compile("Chrome/(\\d+)").matcher(settings.getUserAgentString());
+        if (chrome.find()) webViewChrome = chrome.group(1);
+
         settings.setUserAgentString(userAgent);
+        settings.setTextZoom(100); // the tv's font size setting would otherwise scale youtube's text, and its layout overflows
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
@@ -120,7 +129,8 @@ public class MainActivity extends Activity {
         cookies.setAcceptThirdPartyCookies(webView, true);
 
         updater = new Updater(this);
-        webView.addJavascriptInterface(new Bridge(this), "AndroidBridge");
+        bridge = new Bridge(this);
+        webView.addJavascriptInterface(bridge, "AndroidBridge");
         webView.setWebViewClient(new TvClient());
         webView.setWebChromeClient(new TvChrome());
 
@@ -195,6 +205,14 @@ public class MainActivity extends Activity {
             return true;
         }
 
+        if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_SETTINGS) {
+            if (event.getRepeatCount() == 0) {
+                webView.evaluateJavascript("window.vtToggleSettingsOverlay && window.vtToggleSettingsOverlay()", null);
+            }
+
+            return true; // the menu key on the remote opens VacuumTube's settings, even if youtube's own entry is missing
+        }
+
         return super.onKeyDown(keyCode, event);
     }
 
@@ -209,9 +227,10 @@ public class MainActivity extends Activity {
         webView.evaluateJavascript(
                 "(function(){if(window.__vtBack){window.__vtBack();return true}return false})()",
                 value -> {
-                    if (!"true".equals(value)) { // the script isn't there, so fall back to plain webview history
-                        if (webView.canGoBack()) webView.goBack();
-                        else finish();
+                    if (!"true".equals(value)) { // the script isn't there: send a real escape key, which youtube treats as back
+                        long now = android.os.SystemClock.uptimeMillis();
+                        webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE, 0));
+                        webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ESCAPE, 0));
                     }
                 });
     }
@@ -383,6 +402,27 @@ public class MainActivity extends Activity {
         handler.postDelayed(retryLoad, 5000);
     }
 
+    /** A one-time summary on screen, so a photo of the tv is enough to see why something doesn't work. */
+    private void showStatus() {
+        if (webView == null || isFinishing()) return;
+
+        webView.evaluateJavascript("window.__vtLoaded===true", new android.webkit.ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+                boolean loaded = "true".equals(value);
+
+                String line1 = "VacuumTube " + versionName() + " (build " + versionCode() + ") | Android " + Build.VERSION.RELEASE
+                        + " (API " + Build.VERSION.SDK_INT + ") | WebView Chrome " + webViewChrome;
+                String line2 = "scripts: " + (loaded ? "OK" : "NOT RUNNING" + (lastScriptError != null ? " - " + lastScriptError : ""));
+                String line3 = "VP9 hw: " + Devices.hasHardwareDecoder(Devices.VP9) + " | AV1 hw: " + Devices.hasHardwareDecoder(Devices.AV1)
+                        + " | h264ify: " + bridge.flag("h264ify") + " | low memory mode: " + bridge.flag("low_memory_mode");
+
+                Toast.makeText(MainActivity.this, line1 + "\n" + line2 + "\n" + line3, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, line1 + "\n" + line2 + "\n" + line3, Toast.LENGTH_LONG).show(); // queued: stays up about 7 seconds
+            }
+        });
+    }
+
     // ---- web clients ----
 
     private class TvClient extends WebViewClient {
@@ -427,6 +467,16 @@ public class MainActivity extends Activity {
             CookieManager.getInstance().flush();
 
             if (url == null || !url.startsWith(TV_URL)) return;
+
+            if (!statusShown) {
+                statusShown = true;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showStatus();
+                    }
+                }, 6000);
+            }
 
             if (!updateCheckScheduled) { // look for a new version once the app has settled, so it never slows the start
                 updateCheckScheduled = true;
@@ -473,6 +523,14 @@ public class MainActivity extends Activity {
         @Override
         public boolean onConsoleMessage(ConsoleMessage message) {
             Log.d(TAG, message.sourceId() + ":" + message.lineNumber() + " " + message.message());
+
+            if (message.messageLevel() == ConsoleMessage.MessageLevel.ERROR && lastScriptError == null) {
+                String source = message.sourceId() == null ? "" : message.sourceId();
+                if (source.contains("__vt") || message.message().contains("SyntaxError") || message.message().contains("[vt]")) {
+                    String text = message.message();
+                    lastScriptError = text.length() > 160 ? text.substring(0, 160) : text;
+                }
+            }
             return true;
         }
 

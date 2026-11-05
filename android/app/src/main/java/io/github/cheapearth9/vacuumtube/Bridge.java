@@ -51,11 +51,11 @@ final class Bridge {
         }
 
         try {
-            // builds 8 and 9 turned h264ify on for everyone, which also blocked 4k (vp9/av1): put it back to the default once
             int version = prefs.getInt(KEY_DEFAULTS_VERSION, 1);
-            if (version < 3) {
-                if (version == 2) merged.put("h264ify", false);
-                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 3).apply();
+            if (version < 4) {
+                if (version == 2) merged.put("h264ify", false); // builds 8 and 9 turned it on for everyone, which also blocked 4k
+                applyDeviceDefaults(merged);
+                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 4).apply();
             }
 
             if (GENERATE.equals(merged.optString("sponsorblock_uuid"))) {
@@ -66,6 +66,36 @@ final class Bridge {
         }
 
         return merged;
+    }
+
+    /**
+     * Devices that can't decode vp9/av1 in hardware fall back to software decoding, which stutters badly on a tv box.
+     * Block just the codecs the device is bad at, and keep the rest (4k vp9 stays on devices that handle it).
+     * Only turns things on, so it never overrides a choice made in the settings.
+     */
+    private void applyDeviceDefaults(JSONObject config) throws JSONException {
+        boolean vp9 = Devices.hasHardwareDecoder(Devices.VP9);
+        boolean av1 = Devices.hasHardwareDecoder(Devices.AV1);
+
+        if (!config.optBoolean("h264ify", false)) {
+            if (!vp9) {
+                config.put("h264ify", true); // everything but h264
+            } else if (!av1) {
+                config.put("h264ify", true);
+                config.put("h264ify_disable_webm", false);
+                config.put("h264ify_disable_vp8", false);
+                config.put("h264ify_disable_vp9", false);
+                config.put("h264ify_disable_av1", true); // only av1
+            }
+        }
+
+        if (Devices.isLowEnd(activity) && !config.optBoolean("low_memory_mode", false)) {
+            config.put("low_memory_mode", true);
+        }
+    }
+
+    synchronized boolean flag(String key) {
+        return config.optBoolean(key, false);
     }
 
     private JSONObject readDefaults() {

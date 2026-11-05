@@ -92,6 +92,8 @@ require('./preamble.js')
 if (location.host === 'www.youtube.com' && location.pathname === '/tv' && !window.__vtLoaded) {
     window.__vtLoaded = true
 
+    const earlyYtcfg = window.ytcfg //only set when injected late: configOverrides redefines window.ytcfg, which would lose it
+
     const xhrModifiers = require('../../src/preload/util/xhrModifiers.js')
     xhrModifiers.block() //same as the desktop app: leanback fires an xhr so early that modules would miss it
 
@@ -107,6 +109,8 @@ if (location.host === 'www.youtube.com' && location.pathname === '/tv' && !windo
             console.error('[vt] module failed to load:', name, err)
         }
     }
+
+    if (earlyYtcfg !== undefined && window.ytcfg === undefined) window.ytcfg = earlyYtcfg
 
     for (const [ name, mod ] of loaded) {
         try {
