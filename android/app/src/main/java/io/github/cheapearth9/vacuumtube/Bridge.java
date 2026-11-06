@@ -161,6 +161,16 @@ final class Bridge {
         });
     }
 
+    /** True if the device can really do Widevine DRM. Without it, youtube must be told there is no DRM at all. */
+    @JavascriptInterface
+    public boolean hasWidevine() {
+        try {
+            return android.media.MediaDrm.isCryptoSchemeSupported(java.util.UUID.fromString("edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"));
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+
     @JavascriptInterface
     public String getDeviceName() {
         return Build.MODEL != null ? Build.MODEL : "Android TV";

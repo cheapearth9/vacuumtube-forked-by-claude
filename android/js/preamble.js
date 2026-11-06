@@ -63,3 +63,20 @@ try {
 } catch (err) {
     console.warn('[preamble] could not patch the key names', err)
 }
+
+
+//a device without working Widevine: pretend EME doesn't exist. If it merely rejects every key system, youtube's logged-out
+//(guest) player picks protected streams anyway and fails with "couldn't be decoded"; with no EME it falls back to clear streams
+try {
+    if (window.AndroidBridge && !window.AndroidBridge.hasWidevine()) {
+        const kill = (target, name) => {
+            try { Object.defineProperty(target, name, { value: undefined, configurable: true, writable: true }) } catch (e) {}
+        }
+
+        kill(Navigator.prototype, 'requestMediaKeySystemAccess')
+        kill(window, 'MediaKeys')
+        kill(window, 'MediaKeySystemAccess')
+        kill(window, 'MediaKeySession')
+        kill(HTMLMediaElement.prototype, 'setMediaKeys')
+    }
+} catch (e) {}
