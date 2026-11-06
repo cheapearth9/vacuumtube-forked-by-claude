@@ -42,3 +42,24 @@ try {
 } catch (err) {
     console.warn('[preamble] could not override userAgentData', err)
 }
+
+//old android webviews report the remote's OK button (and some other keys) as key "Unidentified", while vacuumtube's settings
+//overlay reads event.key, so give those events the key name that goes with their key code
+try {
+    const keyNames = { 13: 'Enter', 23: 'Enter', 27: 'Escape', 8: 'Backspace', 32: ' ', 37: 'ArrowLeft', 38: 'ArrowUp', 39: 'ArrowRight', 40: 'ArrowDown' }
+    const original = Object.getOwnPropertyDescriptor(KeyboardEvent.prototype, 'key')
+
+    if (original && original.get) {
+        Object.defineProperty(KeyboardEvent.prototype, 'key', {
+            configurable: true,
+            get() {
+                const key = original.get.call(this)
+                if (key && key !== 'Unidentified') return key;
+
+                return keyNames[this.keyCode] || key;
+            }
+        })
+    }
+} catch (err) {
+    console.warn('[preamble] could not patch the key names', err)
+}

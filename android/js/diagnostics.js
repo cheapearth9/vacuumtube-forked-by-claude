@@ -11,13 +11,14 @@ module.exports = () => {
     function report(text) {
         console.warn('[vt-diagnostics] ' + text)
 
-        if (lines[lines.length - 1] === text) return;
+        text = String(text).slice(0, 700)
+        if (lines.indexOf(text) !== -1) return; //drm failures repeat for every video, one line is enough
         lines.push(text)
-        while (lines.length > 4) lines.shift()
+        while (lines.length > 6) lines.shift()
 
         if (!box) {
             box = document.createElement('div')
-            box.style.cssText = 'position:fixed;left:12px;bottom:12px;max-width:60vw;padding:6px 10px;border-radius:6px;' +
+            box.style.cssText = 'position:fixed;left:12px;bottom:12px;max-width:75vw;padding:6px 10px;border-radius:6px;' +
                 'background:rgba(0,0,0,.7);color:#bbb;font:14px/1.3 sans-serif;z-index:2147483647;pointer-events:none;white-space:pre-wrap'
         }
 
@@ -46,6 +47,41 @@ module.exports = () => {
                 report('drm: ' + keySystem + ' - ' + (err && err.name))
                 throw err
             })
+    }
+
+    window.__vtDiag = report
+
+    //exceptions in youtube's own code are the usual reason a player stays blank on an old webview (a missing function, ...)
+    window.addEventListener('error', (e) => {
+        if (e.target && e.target !== window) return; //resource errors are handled elsewhere
+        report('js error: ' + e.message + ' @' + String(e.filename || '').split('/').pop().slice(-40) + ':' + e.lineno)
+    })
+
+    window.addEventListener('unhandledrejection', (e) => {
+        const reason = e.reason
+        report('js rejection: ' + ((reason && (reason.stack || reason.message)) || reason))
+    })
+
+    const originalError = console.error
+    console.error = function () {
+        try {
+            report('console: ' + Array.prototype.map.call(arguments, (a) => (a && a.message) || String(a)).join(' '))
+        } catch (err) {}
+
+        return originalError.apply(this, arguments)
+    }
+
+    //media source: this is where a codec or format the webview can't handle shows up
+    if (window.MediaSource && MediaSource.prototype.addSourceBuffer) {
+        const addSourceBuffer = MediaSource.prototype.addSourceBuffer
+        MediaSource.prototype.addSourceBuffer = function (mime) {
+            try {
+                return addSourceBuffer.apply(this, arguments)
+            } catch (err) {
+                report('addSourceBuffer ' + mime + ' - ' + (err && err.name))
+                throw err
+            }
+        }
     }
 
     //the video element's own error (decoder failures end up here)

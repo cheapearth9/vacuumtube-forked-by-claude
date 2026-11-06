@@ -91,6 +91,11 @@ const result = await page.evaluate(async () => {
 
     JSON.parse('{"playabilityStatus":{"status":"LOGIN_REQUIRED","reason":"Sign in to continue"}}')
     out.diagnostic = [ ...document.querySelectorAll('div') ].map((d) => d.textContent).find((t) => t.startsWith('playability:')) || null
+    const ok = new KeyboardEvent('keydown', { key: 'Unidentified' })
+    Object.defineProperty(ok, 'keyCode', { value: 13 })
+    out.okKey = ok.key //old android webviews send the remote's OK button as "Unidentified"
+    window.dispatchEvent(new ErrorEvent('error', { message: 'x is not a function', filename: 'https://www.youtube.com/s/tv/base.js', lineno: 7 }))
+    out.jsErrorShown = [ ...document.querySelectorAll('div') ].some((d) => d.textContent.includes('js error: x is not a function'))
     out.userAgentData = navigator.userAgentData?.platform
     return out
 })
@@ -103,6 +108,6 @@ for (const e of errors) console.log(e)
 
 await browser.close()
 
-const failed = !result.loaded || !result.adPlacementsRemoved || !result.adSlotsRemoved || !result.videoKept || result.backKeyCode !== 32769 || !result.diagnostic || errors.length > 0
+const failed = !result.loaded || !result.adPlacementsRemoved || !result.adSlotsRemoved || !result.videoKept || result.backKeyCode !== 32769 || !result.diagnostic || result.okKey !== 'Enter' || !result.jsErrorShown || errors.length > 0
 console.log(failed ? 'SMOKE FAILED' : 'SMOKE OK')
 process.exit(failed ? 1 : 0)

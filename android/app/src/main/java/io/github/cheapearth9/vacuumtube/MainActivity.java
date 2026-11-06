@@ -268,12 +268,19 @@ public class MainActivity extends Activity {
 
                 webView.evaluateJavascript(
                         "(function(){var w=window.__vtWatch;if(!w)return 'unknown';w.mo.disconnect();window.__vtWatch=null;"
-                                + "return (w.changed||location.href!==w.href)?'changed':'same'})()",
+                                + "var changed=w.changed||location.href!==w.href;"
+                                + "var tags={},all=document.getElementsByTagName('*');"
+                                + "for(var i=0;i<all.length;i++){var t=all[i].tagName.toLowerCase();if(t.indexOf('ytlr-')===0)tags[t]=1}"
+                                + "var names=Object.keys(tags);"
+                                // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
+                                + "var login=names.some(function(n){return /account|profile|sign|welcome|onboard|switch/.test(n)});"
+                                + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
+                                + "return (!changed&&login)?'exit':'stay'})()",
                         new android.webkit.ValueCallback<String>() {
                             @Override
                             public void onReceiveValue(String value) {
                                 backCheckPending = false;
-                                if (value != null && value.contains("same") && !isFinishing()) finish();
+                                if (value != null && value.contains("exit") && !isFinishing()) finish();
                             }
                         });
             }
