@@ -82,6 +82,21 @@ public class MainActivity extends Activity {
     private byte[] bundle;
     private Updater updater;
     private Bridge bridge;
+
+    /** Logging is off unless "Debug Info" is switched on in the settings (real crashes are still logged with Log.e). */
+    void debugLog(String message) {
+        try {
+            if (bridge != null && bridge.flag("debug_info")) Log.i(TAG, message);
+        } catch (RuntimeException ignored) {
+        }
+    }
+
+    void debugLog(String message, Throwable error) {
+        try {
+            if (bridge != null && bridge.flag("debug_info")) Log.w(TAG, message, error);
+        } catch (RuntimeException ignored) {
+        }
+    }
     private String webViewChrome = "?";
     private String lastScriptError;
     private boolean statusShown;
@@ -232,7 +247,7 @@ public class MainActivity extends Activity {
     private void goBack() {
         String url = webView.getUrl();
         if (url == null || !url.startsWith(TV_URL)) {
-            Log.i(TAG, "closing: back pressed outside youtube tv, url=" + url);
+            debugLog("closing: back pressed outside youtube tv, url=" + url);
             finish();
             return;
         }
@@ -286,7 +301,7 @@ public class MainActivity extends Activity {
                             public void onReceiveValue(String value) {
                                 backCheckPending = false;
                                 if (value != null && value.contains("exit") && !isFinishing()) {
-                                    Log.i(TAG, "closing: back pressed at the sign-in screen");
+                                    debugLog("closing: back pressed at the sign-in screen");
                                     finish();
                                 }
                             }
@@ -327,7 +342,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        Log.i(TAG, "onDestroy, finishing=" + isFinishing() + ", url=" + (webView != null ? webView.getUrl() : null));
+        debugLog("onDestroy, finishing=" + isFinishing() + ", url=" + (webView != null ? webView.getUrl() : null));
         handler.removeCallbacks(retryLoad);
         if (webView != null) {
             webView.removeJavascriptInterface("AndroidBridge");
@@ -432,7 +447,7 @@ public class MainActivity extends Activity {
 
             return new WebResourceResponse("text/html", "utf-8", 200, "OK", headers, new ByteArrayInputStream(patched.getBytes("UTF-8")));
         } catch (Exception e) {
-            Log.w(TAG, "could not patch the page, loading it as is", e);
+            debugLog("could not patch the page, loading it as is", e);
             return null;
         } finally {
             if (connection != null) connection.disconnect();
@@ -553,7 +568,7 @@ public class MainActivity extends Activity {
             view.evaluateJavascript("window.__vtLoaded===true", value -> {
                 byte[] data = bundle();
                 if (!"true".equals(value) && data != null && webView != null) {
-                    Log.w(TAG, "bundle tag was missing, injecting after load");
+                    debugLog("bundle tag was missing, injecting after load");
                     webView.evaluateJavascript(new String(data, java.nio.charset.Charset.forName("UTF-8")), null);
                 }
             });
@@ -583,7 +598,7 @@ public class MainActivity extends Activity {
     private class TvChrome extends WebChromeClient {
         @Override
         public boolean onConsoleMessage(ConsoleMessage message) {
-            Log.d(TAG, message.sourceId() + ":" + message.lineNumber() + " " + message.message());
+            debugLog(message.sourceId() + ":" + message.lineNumber() + " " + message.message());
 
             if (message.messageLevel() == ConsoleMessage.MessageLevel.ERROR && lastScriptError == null) {
                 String source = message.sourceId() == null ? "" : message.sourceId();

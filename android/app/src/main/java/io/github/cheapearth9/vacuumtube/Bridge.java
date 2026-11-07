@@ -48,7 +48,6 @@ final class Bridge {
             try {
                 merge(merged, new JSONObject(stored));
             } catch (JSONException e) {
-                Log.w(TAG, "stored config is invalid, using defaults", e);
             }
         }
 
@@ -138,7 +137,7 @@ final class Bridge {
             merge(config, new JSONObject(json));
             prefs.edit().putString(KEY_CONFIG, config.toString()).apply();
         } catch (JSONException e) {
-            Log.w(TAG, "ignoring invalid config update", e);
+            activity.debugLog("ignoring invalid config update", e);
         }
 
         return config.toString();
@@ -208,7 +207,7 @@ final class Bridge {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.startActivity(intent);
         } catch (Exception e) {
-            Log.w(TAG, "nothing can open " + url, e); // a lot of tv boxes have no browser
+            activity.debugLog("nothing can open " + url, e); // a lot of tv boxes have no browser
         }
     }
 }

@@ -9,9 +9,8 @@ module.exports = () => {
     let hideTimer = null
 
     function report(text) {
+        try { if (!JSON.parse(window.AndroidBridge.getConfig()).debug_info) return } catch (e) { return } //only shown and logged when "Debug Info" is on
         console.warn('[vt-diagnostics] ' + text)
-
-        try { if (!JSON.parse(window.AndroidBridge.getConfig()).debug_info) return } catch (e) { return } //only shown when "Debug Info" is on
 
         text = String(text).slice(0, 700)
         if (lines.indexOf(text) !== -1) return; //drm failures repeat for every video, one line is enough

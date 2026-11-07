@@ -87,7 +87,7 @@ final class Updater {
                         }
                     });
                 } catch (final Exception e) {
-                    Log.w(TAG, "update check failed", e);
+                    activity.debugLog("update check failed", e);
                     if (manual) activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -212,7 +212,7 @@ final class Updater {
                         }
                     });
                 } catch (final Exception e) {
-                    Log.w(TAG, "download failed", e);
+                    activity.debugLog("download failed", e);
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -238,7 +238,7 @@ final class Updater {
             try {
                 activity.startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + activity.getPackageName())));
             } catch (Exception e) {
-                Log.w(TAG, "cannot open the install permission screen", e);
+                activity.debugLog("cannot open the install permission screen", e);
                 pendingInstall = null;
                 toast("Open Settings and allow VacuumTube to install apps");
             }
@@ -256,7 +256,7 @@ final class Updater {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.startActivity(intent);
         } catch (Exception e) {
-            Log.w(TAG, "cannot start the installer", e);
+            activity.debugLog("cannot start the installer", e);
             toast("This device can't install the update. Download the APK from the releases page instead.");
         }
     }

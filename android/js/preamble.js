@@ -81,3 +81,12 @@ try {
         kill(HTMLMediaElement.prototype, 'setMediaKeys')
     }
 } catch (e) {}
+
+
+//keep the console quiet unless "Debug Info" is on (errors stay, the diagnostics read them)
+try {
+    if (!JSON.parse(window.AndroidBridge.getConfig()).debug_info) {
+        const noop = () => {}
+        console.log = console.info = console.warn = console.debug = noop
+    }
+} catch (e) {}
