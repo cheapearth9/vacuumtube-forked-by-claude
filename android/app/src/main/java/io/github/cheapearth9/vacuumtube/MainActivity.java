@@ -243,7 +243,7 @@ public class MainActivity extends Activity {
         // watch for any change on the page (and a changed address), then press back with the scripts' help if they run
         String script = "(function(){"
                 + (startWatching
-                ? "var w=window.__vtWatch={changed:false,href:location.href,mo:null};"
+                ? "var o0=document.getElementById('vt-settings-overlay-root');var w=window.__vtWatch={changed:false,href:location.href,mo:null,overlay:o0&&!o0.classList.contains('vt-settings-hidden')?o0:null};"
                 + "w.mo=new MutationObserver(function(){w.changed=true});"
                 + "w.mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,characterData:true});"
                 : "")
@@ -274,7 +274,11 @@ public class MainActivity extends Activity {
                                 + "for(var i=0;i<all.length;i++){var t=all[i].tagName.toLowerCase();if(t.indexOf('ytlr-')===0)tags[t]=1}"
                                 + "var names=Object.keys(tags);"
                                 // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
-                                + "var login=names.some(function(n){return /account|profile|sign|welcome|onboard|switch/.test(n)});"
+                                + "var o=w.overlay;var login=names.some(function(n){return /account|profile|sign|welcome|onboard|switch/.test(n)})"
+                                // the home screen (guide sidebar, browse pages, a video...) has sign-in buttons too, but it is never the sign-in screen
+                                + "&&!names.some(function(n){return /guide|browse|watch|search|shorts|shelf|grid|surface/.test(n)})"
+                                // and neither is VacuumTube's own settings menu, which sits on top of whatever screen it was opened from
+                                + "&&!o;"
                                 + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
                                 + "return (!changed&&login)?'exit':'stay'})()",
                         new android.webkit.ValueCallback<String>() {

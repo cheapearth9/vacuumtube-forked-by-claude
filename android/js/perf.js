@@ -1,5 +1,6 @@
-//android only: "Reduce Animations", for slow tv boxes. Transitions are made almost instant (not removed: youtube waits for
-//transitionend / animationend, so a duration of exactly 0 can leave its interface stuck), and costly effects are dropped.
+//android only: "Reduce Animations", for slow tv boxes. Transitions are shortened (not removed: youtube waits for
+//transitionend, so a duration of 0 can leave its interface stuck) and blur is dropped. Keyframe animations and shadows are left
+//alone: touching them made the focus highlight flash white.
 
 const css = require('../../src/preload/util/css')
 const configManager = require('../../src/preload/config')
@@ -9,15 +10,11 @@ module.exports = () => {
 
     css.inject('reduce-animations', `
         *, *::before, *::after {
-            transition-duration: 1ms !important;
+            transition-duration: 60ms !important;
             transition-delay: 0s !important;
-            animation-duration: 1ms !important;
-            animation-delay: 0s !important;
             scroll-behavior: auto !important;
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
-            box-shadow: none !important;
-            text-shadow: none !important;
         }
     `)
 }
