@@ -127,7 +127,8 @@ module.exports = (locale) => [
             {
                 id: 'performance',
                 rows: [
-                    { type: 'toggle', key: 'low_memory_mode' }
+                    { type: 'toggle', key: 'low_memory_mode' },
+                    { type: 'toggle', key: 'debug_info', title: 'Debug Info', description: 'Shows version and error messages on screen, useful for bug reports', hide: !window.AndroidBridge }
                 ]
             },
             {

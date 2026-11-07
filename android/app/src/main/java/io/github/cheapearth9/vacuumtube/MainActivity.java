@@ -456,7 +456,7 @@ public class MainActivity extends Activity {
 
     /** A one-time summary on screen, so a photo of the tv is enough to see why something doesn't work. */
     private void showStatus() {
-        if (webView == null || isFinishing()) return;
+        if (webView == null || isFinishing() || !bridge.flag("debug_info")) return;
 
         webView.evaluateJavascript("window.__vtLoaded===true", new android.webkit.ValueCallback<String>() {
             @Override

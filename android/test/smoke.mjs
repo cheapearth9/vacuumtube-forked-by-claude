@@ -35,7 +35,7 @@ await page.route('https://www.youtube.com/**', async (route) => {
 //what the java bridge provides
 await page.addInitScript((defaults) => {
     window.__bridgeCalls = []
-    let config = { ...defaults, sponsorblock_uuid: 'test-uuid' }
+    let config = { ...defaults, sponsorblock_uuid: 'test-uuid', debug_info: true }
     window.AndroidBridge = {
         getConfig: () => JSON.stringify(config),
         setConfig: (json) => { config = { ...config, ...JSON.parse(json) }; window.__bridgeCalls.push([ 'setConfig', json ]); return JSON.stringify(config) },

@@ -11,6 +11,8 @@ module.exports = () => {
     function report(text) {
         console.warn('[vt-diagnostics] ' + text)
 
+        try { if (!JSON.parse(window.AndroidBridge.getConfig()).debug_info) return } catch (e) { return } //only shown when "Debug Info" is on
+
         text = String(text).slice(0, 700)
         if (lines.indexOf(text) !== -1) return; //drm failures repeat for every video, one line is enough
         lines.push(text)
