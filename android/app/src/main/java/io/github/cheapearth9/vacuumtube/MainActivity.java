@@ -291,7 +291,7 @@ public class MainActivity extends Activity {
                                 // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
                                 + "var o=w.overlay;var login=names.some(function(n){return /account|profile|sign|welcome|onboard|switch/.test(n)})"
                                 // the home screen (guide sidebar, browse pages, a video...) has sign-in buttons too, but it is never the sign-in screen
-                                + "&&!names.some(function(n){return /guide|browse|watch|search|shorts|shelf|grid|surface/.test(n)})"
+                                + "&&!names.some(function(n){return /guide|watch|search|shorts/.test(n)})"
                                 // and neither is VacuumTube's own settings menu, which sits on top of whatever screen it was opened from
                                 + "&&!o;"
                                 + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
