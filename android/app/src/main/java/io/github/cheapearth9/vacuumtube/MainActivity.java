@@ -289,11 +289,11 @@ public class MainActivity extends Activity {
                                 + "for(var i=0;i<all.length;i++){var t=all[i].tagName.toLowerCase();if(t.indexOf('ytlr-')===0)tags[t]=1}"
                                 + "var names=Object.keys(tags);"
                                 // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
-                                + "var o=w.overlay;var login=names.some(function(n){return /account|profile|sign|welcome|onboard|switch/.test(n)})"
-                                // the home screen (guide sidebar, browse pages, a video...) has sign-in buttons too, but it is never the sign-in screen
-                                + "&&!names.some(function(n){return /guide|watch|search|shorts/.test(n)})"
-                                // and neither is VacuumTube's own settings menu, which sits on top of whatever screen it was opened from
-                                + "&&!o;"
+                                + "var o=w.overlay;"
+                                // the home screen, search, a video and the rest of the app always have the guide sidebar / browse / watch pages;
+                                // when none of them is on screen and back changed nothing, this is the sign-in or account picker screen
+                                + "var inApp=names.some(function(n){return /guide|browse|watch|search|shorts|secondary-nav|settings/.test(n)});"
+                                + "var login=names.length>1&&!inApp&&!o;"
                                 + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
                                 + "return (!changed&&login)?'exit':'stay'})()",
                         new android.webkit.ValueCallback<String>() {
