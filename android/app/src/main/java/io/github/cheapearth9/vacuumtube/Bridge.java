@@ -54,10 +54,11 @@ final class Bridge {
 
         try {
             int version = prefs.getInt(KEY_DEFAULTS_VERSION, 1);
-            if (version < 6) {
+            if (version < 7) {
                 if (version == 2) merged.put("h264ify", false); // builds 8 and 9 turned it on for everyone, which also blocked 4k
                 applyDeviceDefaults(merged);
-                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 6).apply();
+                if (version < 7) merged.put("volume", 100); // earlier builds could leave the player quieter than the tv's volume
+                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 7).apply();
             }
 
             if (GENERATE.equals(merged.optString("sponsorblock_uuid"))) {

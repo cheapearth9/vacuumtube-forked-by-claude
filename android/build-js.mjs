@@ -17,7 +17,7 @@ const VIRTUAL_ROOT = '/vt'
 
 const SKIP_MODULES = new Set([ 'no-f11', 'volume-control' ]) //desktop only; a tv's volume is the tv's, so the app always plays at full volume
 const REPLACE_MODULES = { h5vcc: 'android/js/h5vcc-android.js' }
-const EXTRA_MODULES = { 'android-diagnostics': 'android/js/diagnostics.js', 'android-compat': 'android/js/compat.js', 'android-perf': 'android/js/perf.js' } //android only additions
+const EXTRA_MODULES = { 'android-diagnostics': 'android/js/diagnostics.js', 'android-compat': 'android/js/compat.js', 'android-perf': 'android/js/perf.js', 'android-volume': 'android/js/volume.js' } //android only additions
 
 const ALIASES = {
     electron: 'android/js/shims/electron.js',

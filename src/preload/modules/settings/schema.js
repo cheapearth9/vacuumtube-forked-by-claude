@@ -128,6 +128,9 @@ module.exports = (locale) => [
                 id: 'performance',
                 rows: [
                     { type: 'toggle', key: 'low_memory_mode' },
+                    { type: 'info', title: 'Player Volume', value: (config) => (typeof config.volume === 'number' ? config.volume : 100) + '%', hide: !window.AndroidBridge },
+                    { type: 'button', title: 'Volume +5', run: () => window.__vtVolumeStep?.(5), hide: !window.AndroidBridge },
+                    { type: 'button', title: 'Volume -5', run: () => window.__vtVolumeStep?.(-5), hide: !window.AndroidBridge },
                     { type: 'toggle', key: 'reduce_animations', title: 'Reduce Animations', description: 'Makes transitions instant and removes shadows and blur effects, which helps on slow devices. Relaunch after toggling', hide: !window.AndroidBridge },
                     { type: 'toggle', key: 'debug_info', title: 'Debug Info', description: 'Shows version and error messages on screen, useful for bug reports', hide: !window.AndroidBridge }
                 ]
