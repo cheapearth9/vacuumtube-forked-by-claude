@@ -258,7 +258,8 @@ public class MainActivity extends Activity {
         // watch for any change on the page (and a changed address), then press back with the scripts' help if they run
         String script = "(function(){"
                 + (startWatching
-                ? "var o0=document.getElementById('vt-settings-overlay-root');var w=window.__vtWatch={changed:false,href:location.href,mo:null,overlay:o0&&!o0.classList.contains('vt-settings-hidden')?o0:null};"
+                ? "var t0={},a0=document.getElementsByTagName('*');for(var j=0;j<a0.length;j++){var q=a0[j].tagName.toLowerCase();if(q.indexOf('ytlr-')===0)t0[q]=1}"
+                + "var o0=document.getElementById('vt-settings-overlay-root');var w=window.__vtWatch={before:Object.keys(t0).sort().join(' '),changed:false,href:location.href,mo:null,overlay:o0&&!o0.classList.contains('vt-settings-hidden')?o0:null};"
                 + "w.mo=new MutationObserver(function(){w.changed=true});"
                 + "w.mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,characterData:true});"
                 : "")
@@ -293,7 +294,10 @@ public class MainActivity extends Activity {
                                 // the home screen, search, a video and the rest of the app always have the guide sidebar / browse / watch pages;
                                 // when none of them is on screen and back changed nothing, this is the sign-in or account picker screen
                                 + "var inApp=names.some(function(n){return /guide|browse|watch|search|shorts|secondary-nav|settings/.test(n)});"
-                                + "var login=names.length>1&&!inApp&&!o;"
+                                // focus moving or animating counts as a change, so compare the screen itself: same set of page elements = nothing was left
+                                + "var sameScreen=names.slice().sort().join(' ')===w.before;"
+                                + "var login=names.length>1&&!inApp&&!o&&sameScreen;"
+                                + "if(login)changed=false;"
                                 + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
                                 + "return (!changed&&login)?'exit':'stay'})()",
                         new android.webkit.ValueCallback<String>() {

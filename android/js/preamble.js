@@ -3,9 +3,14 @@
 const BACK = 32769; //cobalt's keycode for the back button (see modules/mouse.js)
 
 function pressKey(keyCode) {
+    //VacuumTube's own settings menu understands Escape, and is closed by back (returning to youtube's settings page below it)
+    const overlay = document.getElementById('vt-settings-overlay-root')
+    const overlayOpen = !!overlay && !overlay.classList.contains('vt-settings-hidden')
+
     for (const type of [ 'keydown', 'keyup' ]) {
         const event = new Event(type)
         event.keyCode = keyCode;
+        if (overlayOpen) event.key = 'Escape'
         document.dispatchEvent(event)
     }
 }
