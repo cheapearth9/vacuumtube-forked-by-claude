@@ -35,7 +35,6 @@ final class Updater {
     private static final String PREFS = "vacuumtube-updates";
     private static final String KEY_LAST_CHECK = "last_check";
     private static final String KEY_SKIPPED = "skipped_version";
-    private static final long CHECK_INTERVAL_MS = 6L * 60 * 60 * 1000;
 
     private final MainActivity activity;
     private final SharedPreferences prefs;
@@ -49,11 +48,8 @@ final class Updater {
         this.prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
-    /** Automatic check: at most once every few hours, and silent unless there is something new. */
+    /** Automatic check on every launch, silent unless there is something new (a version you skipped stays quiet). */
     void checkIfDue() {
-        long last = prefs.getLong(KEY_LAST_CHECK, 0);
-        if (System.currentTimeMillis() - last < CHECK_INTERVAL_MS) return;
-
         check(false);
     }
 

@@ -537,7 +537,7 @@ public class MainActivity extends Activity {
                     public void run() {
                         checkForUpdates(false);
                     }
-                }, 8000);
+                }, 3000);
             }
 
             // the page loaded without our tag (the fetch above failed), so inject late: not as clean, but better than nothing
