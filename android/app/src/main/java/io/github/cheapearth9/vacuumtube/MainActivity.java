@@ -232,6 +232,7 @@ public class MainActivity extends Activity {
     private void goBack() {
         String url = webView.getUrl();
         if (url == null || !url.startsWith(TV_URL)) {
+            Log.i(TAG, "closing: back pressed outside youtube tv, url=" + url);
             finish();
             return;
         }
@@ -280,7 +281,10 @@ public class MainActivity extends Activity {
                             @Override
                             public void onReceiveValue(String value) {
                                 backCheckPending = false;
-                                if (value != null && value.contains("exit") && !isFinishing()) finish();
+                                if (value != null && value.contains("exit") && !isFinishing()) {
+                                    Log.i(TAG, "closing: back pressed at the sign-in screen");
+                                    finish();
+                                }
                             }
                         });
             }
@@ -319,6 +323,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        Log.i(TAG, "onDestroy, finishing=" + isFinishing() + ", url=" + (webView != null ? webView.getUrl() : null));
         handler.removeCallbacks(retryLoad);
         if (webView != null) {
             webView.removeJavascriptInterface("AndroidBridge");
