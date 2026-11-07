@@ -13,8 +13,9 @@ function pressKey(keyCode) {
 //the app's back button can't reach the page as a key event, so the activity calls this instead
 window.__vtBack = () => pressKey(BACK)
 
-//youtube sends EXIT_APP and then window.close(), which a webview ignores for its main window
-window.close = () => window.AndroidBridge.exit()
+//youtube calls window.close() when back is pressed at the top of the app (and for its exit prompt); that must not leave the app.
+//leaving is decided by the activity (back at the sign-in / account screen only)
+window.close = () => {}
 
 //desktop vacuumtube overrides client hints through the debugger, a webview has no equivalent, so mirror what src/ua.js reports
 try {
