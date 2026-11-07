@@ -53,11 +53,12 @@ final class Bridge {
 
         try {
             int version = prefs.getInt(KEY_DEFAULTS_VERSION, 1);
-            if (version < 7) {
+            if (version < 8) {
                 if (version == 2) merged.put("h264ify", false); // builds 8 and 9 turned it on for everyone, which also blocked 4k
                 applyDeviceDefaults(merged);
+                merged.put("low_memory_mode", false); // earlier builds switched it on for slow devices, which made things worse; it is off by default now
                 if (version < 7) merged.put("volume", 100); // earlier builds could leave the player quieter than the tv's volume
-                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 7).apply();
+                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 8).apply();
             }
 
             if (GENERATE.equals(merged.optString("sponsorblock_uuid"))) {
@@ -91,9 +92,6 @@ final class Bridge {
             }
         }
 
-        if ((Devices.isLowEnd(activity) || (webViewMajor > 0 && webViewMajor < 90)) && !config.optBoolean("low_memory_mode", false)) {
-            config.put("low_memory_mode", true);
-        }
 
     }
 

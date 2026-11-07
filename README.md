@@ -21,7 +21,7 @@ It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen We
 - Voice search asks for microphone permission the first time.
 - Press **Menu** (or the **Settings** key) on the remote to open VacuumTube's settings directly.
 - A few seconds after launch, a small message shows the app version, Android and WebView versions, and whether VacuumTube's scripts are running. If something misbehaves, a photo of it tells what's wrong.
-- Devices without hardware VP9 or AV1 decoding automatically get H.264-only playback, and low-end boxes get "low memory mode". Both can be changed in VacuumTube settings.
+- Devices without hardware VP9 or AV1 decoding automatically get H.264-only playback (change it in VacuumTube settings). "Low memory mode" is off by default everywhere; it is available in settings under Advanced.
 
 ## What works
 
