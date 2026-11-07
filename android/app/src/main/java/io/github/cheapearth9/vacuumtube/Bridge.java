@@ -95,10 +95,6 @@ final class Bridge {
             config.put("low_memory_mode", true);
         }
 
-        // slow devices: skip animations and effects (only ever switched on here; the settings toggle turns it off again)
-        if ((Devices.isLowEnd(activity) || (webViewMajor > 0 && webViewMajor < 90)) && !config.has("reduce_animations")) {
-            config.put("reduce_animations", true);
-        }
     }
 
     synchronized boolean flag(String key) {
