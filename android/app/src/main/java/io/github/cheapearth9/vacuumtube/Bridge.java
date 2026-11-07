@@ -54,10 +54,10 @@ final class Bridge {
 
         try {
             int version = prefs.getInt(KEY_DEFAULTS_VERSION, 1);
-            if (version < 5) {
+            if (version < 6) {
                 if (version == 2) merged.put("h264ify", false); // builds 8 and 9 turned it on for everyone, which also blocked 4k
                 applyDeviceDefaults(merged);
-                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 5).apply();
+                prefs.edit().putString(KEY_CONFIG, merged.toString()).putInt(KEY_DEFAULTS_VERSION, 6).apply();
             }
 
             if (GENERATE.equals(merged.optString("sponsorblock_uuid"))) {
@@ -93,6 +93,11 @@ final class Bridge {
 
         if ((Devices.isLowEnd(activity) || (webViewMajor > 0 && webViewMajor < 90)) && !config.optBoolean("low_memory_mode", false)) {
             config.put("low_memory_mode", true);
+        }
+
+        // slow devices: skip animations and effects (only ever switched on here; the settings toggle turns it off again)
+        if ((Devices.isLowEnd(activity) || (webViewMajor > 0 && webViewMajor < 90)) && !config.has("reduce_animations")) {
+            config.put("reduce_animations", true);
         }
     }
 

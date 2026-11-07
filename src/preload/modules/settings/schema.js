@@ -128,6 +128,7 @@ module.exports = (locale) => [
                 id: 'performance',
                 rows: [
                     { type: 'toggle', key: 'low_memory_mode' },
+                    { type: 'toggle', key: 'reduce_animations', title: 'Reduce Animations', description: 'Makes transitions instant and removes shadows and blur effects, which helps on slow devices. Relaunch after toggling', hide: !window.AndroidBridge },
                     { type: 'toggle', key: 'debug_info', title: 'Debug Info', description: 'Shows version and error messages on screen, useful for bug reports', hide: !window.AndroidBridge }
                 ]
             },
