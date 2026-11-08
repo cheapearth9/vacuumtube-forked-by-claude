@@ -65,8 +65,8 @@ const result = await page.evaluate(() => {
 await page.waitForTimeout(600)
 result.overlayVisible = await page.evaluate(() => { const o = document.querySelector('[class*="vt-"]'); return !!o && o.getBoundingClientRect().width > 0 })
 result.text = await page.evaluate(() => document.body.innerText.slice(0, 300).replace(/\s+/g, ' '))
-//the app's back button (cobalt back key, sent by the activity) must close the menu
-await page.evaluate(() => window.__vtBack())
+//back is a real Escape key (sent by the activity) and must close the menu
+await page.keyboard.press('Escape')
 await page.waitForTimeout(500)
 result.backClosesMenu = await page.evaluate(() => document.getElementById('vt-settings-overlay-root').classList.contains('vt-settings-hidden'))
 await page.screenshot({ path: process.env.SHOT || '/tmp/settings.png' })

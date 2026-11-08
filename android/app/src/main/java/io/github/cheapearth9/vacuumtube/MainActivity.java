@@ -237,12 +237,9 @@ public class MainActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private boolean backCheckPending;
-
     /**
-     * Back is sent to the page (as cobalt's back key, or a real Escape key when the scripts aren't running).
-     * If nothing at all changed on the page afterwards, there was nowhere left to go back to (the home screen's exit
-     * prompt, the sign-in screen...), so that press exits the app: keep pressing Back and the last press leaves.
+     * Back is a real Escape key, which is what desktop VacuumTube gives YouTube. YouTube decides what it means (go back, close a
+     * menu, and at the account picker ask to quit, which arrives as window.close() and leaves the app).
      */
     private void goBack() {
         String url = webView.getUrl();
@@ -252,66 +249,9 @@ public class MainActivity extends Activity {
             return;
         }
 
-        final boolean startWatching = !backCheckPending;
-        backCheckPending = true;
-
-        // watch for any change on the page (and a changed address), then press back with the scripts' help if they run
-        String script = "(function(){"
-                + (startWatching
-                ? "var t0={},a0=document.getElementsByTagName('*');for(var j=0;j<a0.length;j++){var q=a0[j].tagName.toLowerCase();if(q.indexOf('ytlr-')===0)t0[q]=1}"
-                + "var pk=false,pe=document.querySelectorAll('ytlr-account-selector,ytlr-carousel-account');for(var k=0;k<pe.length;k++){var r=pe[k].getBoundingClientRect(),cs=getComputedStyle(pe[k]);if(r.width>0&&r.height>0&&cs.visibility!=='hidden'&&cs.display!=='none'&&parseFloat(cs.opacity)>0.1)pk=true}"
-                + "var o0=document.getElementById('vt-settings-overlay-root');var w=window.__vtWatch={picker:pk,before:Object.keys(t0).sort().join(' '),changed:false,href:location.href,mo:null,overlay:o0&&!o0.classList.contains('vt-settings-hidden')?o0:null};"
-                + "w.mo=new MutationObserver(function(){w.changed=true});"
-                + "w.mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,characterData:true});"
-                : "")
-                + "if(window.__vtBack){window.__vtBack();return true}return false})()";
-
-        webView.evaluateJavascript(script, new android.webkit.ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String value) {
-                if (!"true".equals(value)) { // the scripts aren't there: send a real escape key, which youtube treats as back
-                    long now = android.os.SystemClock.uptimeMillis();
-                    webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE, 0));
-                    webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ESCAPE, 0));
-                }
-            }
-        });
-
-        if (!startWatching) return; // a check from a moment ago is still running and will see this press too
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (webView == null) return;
-
-                webView.evaluateJavascript(
-                        "(function(){var w=window.__vtWatch;if(!w)return 'unknown';w.mo.disconnect();window.__vtWatch=null;"
-                                + "var changed=w.changed||location.href!==w.href;"
-                                + "var tags={},all=document.getElementsByTagName('*');"
-                                + "for(var i=0;i<all.length;i++){var t=all[i].tagName.toLowerCase();if(t.indexOf('ytlr-')===0)tags[t]=1}"
-                                + "var names=Object.keys(tags);"
-                                // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
-                                + "var o=w.overlay;"
-                                // the account picker ("who's watching") is the only screen where back leaves the app. It is recognised by what was on screen
-                                // when back was pressed (a visible account picker; a video page may be loaded behind it), not by what is there
-                                // afterwards: youtube may already have moved on to the page behind it. The menu being open never counts.
-                                + "var b=w.before;"
-                                + "var login=w.picker&&!o;"
-                                + "if(login)changed=false;"
-                                + "if(!login&&window.__vtDiag)window.__vtDiag('Back pressed, app stays open. picker-visible-before='+w.picker+' changed='+changed+' '+location.hash+' | BEFORE: '+w.before+' | AFTER: '+names.join(' '));"
-                                + "return (!changed&&login)?'exit':'stay'})()",
-                        new android.webkit.ValueCallback<String>() {
-                            @Override
-                            public void onReceiveValue(String value) {
-                                backCheckPending = false;
-                                if (value != null && value.contains("exit") && !isFinishing()) {
-                                    debugLog("closing: back pressed at the sign-in screen");
-                                    finish();
-                                }
-                            }
-                        });
-            }
-        }, 600);
+        long now = android.os.SystemClock.uptimeMillis();
+        webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE, 0));
+        webView.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ESCAPE, 0));
     }
 
     @Override

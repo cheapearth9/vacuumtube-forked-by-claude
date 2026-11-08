@@ -16,7 +16,7 @@ It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen We
 
 ## Using it
 
-- Navigate with the remote's D-pad, **OK** to select, **Back** to go back. Pressing Back on the home screen leaves the app.
+- Navigate with the remote's D-pad, **OK** to select, **Back** to go back. Back is sent to YouTube as an Escape key, like desktop VacuumTube, and YouTube decides what it does (at the account picker it quits the app).
 - Open YouTube's own **Settings** screen and choose **VacuumTube** to reach VacuumTube's settings.
 - Voice search asks for microphone permission the first time.
 - Press **Menu** (or the **Settings** key) on the remote to open VacuumTube's settings directly.
