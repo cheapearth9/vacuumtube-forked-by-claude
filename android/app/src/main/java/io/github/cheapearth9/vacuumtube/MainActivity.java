@@ -291,13 +291,11 @@ public class MainActivity extends Activity {
                                 + "var names=Object.keys(tags);"
                                 // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
                                 + "var o=w.overlay;"
-                                // the account picker ("who's watching") is the only screen where back leaves the app: it has account-selector elements and
-                                // none of the browse / watch / search pages (it does have the guide sidebar, like the home screen)
-                                + "var inApp=names.some(function(n){return /browse|watch|search|shorts|secondary-nav|settings/.test(n)});"
-                                + "var picker=names.some(function(n){return /account-selector|carousel-account/.test(n)});"
-                                // focus moving or animating counts as a change, so compare the screen itself: same set of page elements = nothing was left
-                                + "var sameScreen=names.slice().sort().join(' ')===w.before;"
-                                + "var login=picker&&!inApp&&!o&&sameScreen;"
+                                // the account picker ("who's watching") is the only screen where back leaves the app. It is recognised by what was on screen
+                                // when back was pressed (account-selector elements, and no browse / watch / search page), not by what is there
+                                // afterwards: youtube may already have moved on to the page behind it. The menu being open never counts.
+                                + "var b=w.before;"
+                                + "var login=/account-selector|carousel-account/.test(b)&&!/browse|watch|search|shorts|secondary-nav|settings/.test(b)&&!o;"
                                 + "if(login)changed=false;"
                                 + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
                                 + "return (!changed&&login)?'exit':'stay'})()",
