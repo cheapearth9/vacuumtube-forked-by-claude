@@ -259,7 +259,8 @@ public class MainActivity extends Activity {
         String script = "(function(){"
                 + (startWatching
                 ? "var t0={},a0=document.getElementsByTagName('*');for(var j=0;j<a0.length;j++){var q=a0[j].tagName.toLowerCase();if(q.indexOf('ytlr-')===0)t0[q]=1}"
-                + "var o0=document.getElementById('vt-settings-overlay-root');var w=window.__vtWatch={before:Object.keys(t0).sort().join(' '),changed:false,href:location.href,mo:null,overlay:o0&&!o0.classList.contains('vt-settings-hidden')?o0:null};"
+                + "var pk=false,pe=document.querySelectorAll('ytlr-account-selector,ytlr-carousel-account');for(var k=0;k<pe.length;k++){var r=pe[k].getBoundingClientRect(),cs=getComputedStyle(pe[k]);if(r.width>0&&r.height>0&&cs.visibility!=='hidden'&&cs.display!=='none'&&parseFloat(cs.opacity)>0.1)pk=true}"
+                + "var o0=document.getElementById('vt-settings-overlay-root');var w=window.__vtWatch={picker:pk,before:Object.keys(t0).sort().join(' '),changed:false,href:location.href,mo:null,overlay:o0&&!o0.classList.contains('vt-settings-hidden')?o0:null};"
                 + "w.mo=new MutationObserver(function(){w.changed=true});"
                 + "w.mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,characterData:true});"
                 : "")
@@ -292,10 +293,10 @@ public class MainActivity extends Activity {
                                 // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
                                 + "var o=w.overlay;"
                                 // the account picker ("who's watching") is the only screen where back leaves the app. It is recognised by what was on screen
-                                // when back was pressed (account-selector elements, and no browse / watch / search page), not by what is there
+                                // when back was pressed (a visible account picker; a video page may be loaded behind it), not by what is there
                                 // afterwards: youtube may already have moved on to the page behind it. The menu being open never counts.
                                 + "var b=w.before;"
-                                + "var login=/account-selector|carousel-account/.test(b)&&!/browse|watch|search|shorts|secondary-nav|settings/.test(b)&&!o;"
+                                + "var login=w.picker&&!o;"
                                 + "if(login)changed=false;"
                                 + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
                                 + "return (!changed&&login)?'exit':'stay'})()",
