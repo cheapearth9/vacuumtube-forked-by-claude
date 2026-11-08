@@ -291,12 +291,13 @@ public class MainActivity extends Activity {
                                 + "var names=Object.keys(tags);"
                                 // the sign-in screen and the account (profile) picker are the only screens where Back leaves the app
                                 + "var o=w.overlay;"
-                                // the home screen, search, a video and the rest of the app always have the guide sidebar / browse / watch pages;
-                                // when none of them is on screen and back changed nothing, this is the sign-in or account picker screen
-                                + "var inApp=names.some(function(n){return /guide|browse|watch|search|shorts|secondary-nav|settings/.test(n)});"
+                                // the account picker ("who's watching") is the only screen where back leaves the app: it has account-selector elements and
+                                // none of the browse / watch / search pages (it does have the guide sidebar, like the home screen)
+                                + "var inApp=names.some(function(n){return /browse|watch|search|shorts|secondary-nav|settings/.test(n)});"
+                                + "var picker=names.some(function(n){return /account-selector|carousel-account/.test(n)});"
                                 // focus moving or animating counts as a change, so compare the screen itself: same set of page elements = nothing was left
                                 + "var sameScreen=names.slice().sort().join(' ')===w.before;"
-                                + "var login=names.length>1&&!inApp&&!o&&sameScreen;"
+                                + "var login=picker&&!inApp&&!o&&sameScreen;"
                                 + "if(login)changed=false;"
                                 + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
                                 + "return (!changed&&login)?'exit':'stay'})()",
