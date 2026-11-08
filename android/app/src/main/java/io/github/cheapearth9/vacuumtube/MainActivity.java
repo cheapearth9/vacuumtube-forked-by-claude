@@ -298,7 +298,7 @@ public class MainActivity extends Activity {
                                 + "var b=w.before;"
                                 + "var login=w.picker&&!o;"
                                 + "if(login)changed=false;"
-                                + "if(!changed&&!login&&window.__vtDiag)window.__vtDiag('Back did nothing here, so the app stays open. '+location.hash+' '+names.join(' '));"
+                                + "if(!login&&window.__vtDiag)window.__vtDiag('Back pressed, app stays open. picker-visible-before='+w.picker+' changed='+changed+' '+location.hash+' | BEFORE: '+w.before+' | AFTER: '+names.join(' '));"
                                 + "return (!changed&&login)?'exit':'stay'})()",
                         new android.webkit.ValueCallback<String>() {
                             @Override
