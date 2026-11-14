@@ -58,8 +58,10 @@ styles the frame and the generic row types from render.js only
 
 .vt-settings-container {
     position: relative;
-    width: min(1100px, 90vw);
-    height: min(760px, 86vh);
+    --vt-zoom: 1;
+    zoom: var(--vt-zoom);
+    width: min(1100px, calc(90vw / var(--vt-zoom)));
+    height: min(760px, calc(86vh / var(--vt-zoom)));
     background: var(--vt-bg);
     border-radius: 18px;
     display: flex;
@@ -492,3 +494,6 @@ styles the frame and the generic row types from render.js only
     background: #666;
     transition: transform 0.15s ease-out;
 }
+/*bigger on big screens (tv / monitor); a phone or tablet keeps the normal size*/
+@media (min-width: 1281px) { #vt-settings-overlay-root { --vt-zoom: 1.5; } }
+@media (min-width: 1900px) { #vt-settings-overlay-root { --vt-zoom: 1.8; } }
