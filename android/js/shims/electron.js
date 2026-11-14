@@ -31,7 +31,7 @@ function appInfo() {
         status: 'idle', //the about page's "Check now" button asks the app to check, which shows the update menu itself
         currentVersion: info.version || '',
         latestVersion: '',
-        platform: 'Android',
+        platform: info.platform || 'Android',
         arch: info.arch || 'arm64',
         installationType: 'application',
         canAutoUpdate: true, //only changes the wording on the about page ("Automatic installer")

@@ -1,0 +1,22 @@
+# generated into VacuumTube.xcodeproj by XcodeGen in CI (see .github/workflows/ios.yml)
+name: VacuumTube
+options:
+  bundleIdPrefix: io.github.cheapearth9
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  VacuumTube:
+    type: application
+    platform: iOS
+    sources:
+      - path: VacuumTube
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.cheapearth9.vacuumtube
+        INFOPLIST_FILE: VacuumTube/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "2.0.2"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: NO

@@ -1,0 +1,66 @@
+name: iOS IPA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'android/js/**'
+      - 'android/build-js.mjs'
+      - 'src/preload/**'
+      - 'src/config.js'
+      - 'locale/**'
+      - 'assets/icon.png'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bundle the scripts for the web view
+        run: PLATFORM=ios node android/build-js.mjs
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Build (unsigned, AltStore signs it on your phone)
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          cd ios
+          xcodebuild -project VacuumTube.xcodeproj -scheme VacuumTube -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build | tail -40
+
+      - name: Package the IPA
+        run: |
+          cd ios/build/Build/Products/Release-iphoneos
+          mkdir Payload && cp -R VacuumTube.app Payload/
+          zip -qry VacuumTube.ipa Payload
+          mv VacuumTube.ipa "$GITHUB_WORKSPACE/VacuumTube-iOS.ipa"
+
+      - name: Write the AltStore source
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          node ios/make-altstore-source.mjs "$VERSION" "${{ github.run_number }}" "${{ github.repository }}" VacuumTube-iOS.ipa > altstore.json
+          cat altstore.json
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view ios-latest >/dev/null 2>&1 || gh release create ios-latest --title "VacuumTube for iOS (latest)" --notes "Unofficial iOS build. Add the AltStore source from the README, or sideload the IPA."
+          gh release upload ios-latest VacuumTube-iOS.ipa altstore.json --clobber

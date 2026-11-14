@@ -12,7 +12,8 @@ import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(here, '..')
-const assets = path.join(here, 'app/src/main/assets')
+const IOS = process.env.PLATFORM === 'ios' //the same bundle also runs in the ios app's wkwebview, with ios/js/bridge.js standing in for the android java bridge
+const assets = IOS ? path.join(root, 'ios/VacuumTube/Resources') : path.join(here, 'app/src/main/assets')
 const VIRTUAL_ROOT = '/vt'
 
 const SKIP_MODULES = new Set([ 'no-f11', 'volume-control' ]) //desktop only; a tv's volume is the tv's, so the app always plays at full volume
@@ -236,14 +237,14 @@ function configDefaults() {
 
 fs.mkdirSync(assets, { recursive: true })
 
-const bundle = build()
+const bundle = (IOS ? fs.readFileSync(path.join(root, 'ios/js/bridge.js'), 'utf-8') + '\n' : '') + build()
 fs.writeFileSync(path.join(assets, 'vacuumtube.js'), bundle)
 fs.writeFileSync(path.join(assets, 'config-defaults.json'), JSON.stringify(configDefaults(), null, 2))
 
 //old webviews (a tv box can ship Chrome 52 from 2016) can't parse optional chaining, async/await, class fields and the like
 //if ESBUILD is set (e.g. "npx --yes esbuild@0.28.2", as in CI) the bundle is rewritten in place for those
 const bundlePath = path.join(assets, 'vacuumtube.js')
-if (process.env.ESBUILD) {
+if (process.env.ESBUILD && !IOS) {
     const { execSync } = await import('node:child_process')
     execSync(`${process.env.ESBUILD} "${bundlePath}" --target=chrome52 --outfile="${bundlePath}" --allow-overwrite --log-level=warning`, { stdio: 'inherit' })
     console.log('lowered the bundle for chrome 52')
