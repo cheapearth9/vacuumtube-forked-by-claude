@@ -23,6 +23,16 @@ It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen We
 - A few seconds after launch, a small message shows the app version, Android and WebView versions, and whether VacuumTube's scripts are running. If something misbehaves, a photo of it tells what's wrong.
 - Devices without hardware VP9 or AV1 decoding automatically get H.264-only playback (change it in VacuumTube settings). "Low memory mode" is off by default everywhere; it is available in settings under Advanced.
 
+## AltStore / SideStore source for all my iOS apps
+
+One source that lists every IPA I build on GitHub (VacuumTube for iOS and AirBrowser). In AltStore or SideStore choose **Sources → +** and paste:
+
+```
+https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/altsource/altsource.json
+```
+
+It refreshes itself every few hours and after each VacuumTube iOS build. The VacuumTube-only source from the iOS section below still works as well.
+
 ## VacuumTube for iOS (experimental)
 
 An iPhone / iPad version of the same thing. **Plug in an HDMI adapter or start AirPlay, and the YouTube TV interface appears on that screen by itself**, with no toggle. The phone becomes the remote, drawn like the original VacuumTube's touch controls (round arrow buttons at the bottom left, Back and OK at the bottom right, plus play/pause and VacuumTube settings at the top), and an external keyboard works too (arrows, Return = OK, Esc = Back, Space, typing in search, Ctrl+O for VacuumTube's settings). With no external display connected, the TV interface fills the phone, and touching the screen shows the same on-screen arrows, Back and OK as the original VacuumTube (turn them off with "Touch Overlay" in settings). Mouse and trackpad are not supported.

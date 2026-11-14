@@ -63,4 +63,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view ios-latest >/dev/null 2>&1 || gh release create ios-latest --title "VacuumTube for iOS (latest)" --notes "Unofficial iOS build. Add the AltStore source from the README, or sideload the IPA."
+          gh release edit ios-latest --notes "Build ${{ github.run_number }}. Unofficial iOS build: add the AltStore source from the README, or sideload the IPA."
           gh release upload ios-latest VacuumTube-iOS.ipa altstore.json --clobber

@@ -1,0 +1,37 @@
+{
+    "name": "cheapearth9's apps",
+    "identifier": "io.github.cheapearth9.altsource",
+    "subtitle": "VacuumTube, AirBrowser and more",
+    "description": "Sideloadable iOS apps built on GitHub by cheapearth9. They are unsigned: AltStore / SideStore sign them with your own Apple ID.",
+    "iconURL": "https://raw.githubusercontent.com/cheapearth9/vacuumtube-forked-by-claude/main/ios/VacuumTube/Assets.xcassets/AppIcon.appiconset/icon-1024.png",
+    "website": "https://github.com/cheapearth9/vacuumtube-forked-by-claude",
+    "tintColor": "#FF0033",
+    "apps": [
+        {
+            "name": "VacuumTube",
+            "repo": "cheapearth9/vacuumtube-forked-by-claude",
+            "ipa": "VacuumTube-iOS.ipa",
+            "version": "2.0.2",
+            "bundleIdentifier": "io.github.cheapearth9.vacuumtube",
+            "developerName": "shy1132 (iOS port by cheapearth9)",
+            "subtitle": "YouTube TV, no ads",
+            "description": "An unofficial iOS port of VacuumTube: the regular YouTube TV interface with an ad blocker and VacuumTube's settings menu. Plug in an HDMI adapter or use AirPlay and YouTube appears on that screen; the iPad or iPhone becomes the remote. External keyboards work too.",
+            "iconURL": "https://raw.githubusercontent.com/cheapearth9/vacuumtube-forked-by-claude/main/ios/VacuumTube/Assets.xcassets/AppIcon.appiconset/icon-1024.png",
+            "tintColor": "#FF0033",
+            "minOS": "15.0"
+        },
+        {
+            "name": "AirBrowser",
+            "repo": "cheapearth9/AirBrowser",
+            "ipa": "AirBrowser.ipa",
+            "version": "1.7",
+            "bundleIdentifier": "com.custom.AirBrowser",
+            "developerName": "cheapearth9",
+            "subtitle": "Browser for your HDMI / AirPlay screen",
+            "description": "A browser that can put pages on a connected HDMI or AirPlay display while the iPad or iPhone stays the controller.",
+            "iconURL": "https://raw.githubusercontent.com/cheapearth9/AirBrowser/main/AirBrowser/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+            "tintColor": "#0A84FF",
+            "minOS": "17.0"
+        }
+    ]
+}

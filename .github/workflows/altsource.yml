@@ -1,0 +1,31 @@
+name: AltStore source (all apps)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_run:
+    workflows: ['iOS IPA']
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the combined source
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node altsource/make.mjs > altsource.json && cat altsource.json
+      - name: Publish it
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view altsource >/dev/null 2>&1 || gh release create altsource --title "AltStore source (all apps)" --notes "Add altsource.json to AltStore / SideStore. It is regenerated automatically."
+          gh release upload altsource altsource.json --clobber
