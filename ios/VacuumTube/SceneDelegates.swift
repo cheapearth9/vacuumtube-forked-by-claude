@@ -15,22 +15,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window.makeKeyAndVisible()
             self.window = window
         } else {
-            // an external display: the TV interface moves onto it as soon as it connects (no toggle), and back when it goes
-            let controller = UIViewController()
-            controller.view.backgroundColor = .black
-
-            let window = UIWindow(windowScene: windowScene)
-            window.rootViewController = controller
-            window.isHidden = false // not makeKeyAndVisible: the phone keeps keyboard focus
-            self.window = window
-
-            AppDelegate.host.attachExternal(window: window, container: controller.view)
+            // an HDMI or AirPlay display: hand the scene over. The TV interface goes onto it by itself while "AirPlay / HDMI
+            // Display" is on in the settings (the default), and back to the phone when it is switched off or the display goes.
+            AppDelegate.host.externalSceneConnected(windowScene)
         }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
         guard let windowScene = scene as? UIWindowScene, windowScene.session.role != .windowApplication else { return }
-        if let window = window { AppDelegate.host.detachExternal(window: window) }
-        window = nil
+        AppDelegate.host.externalSceneDisconnected(windowScene)
     }
 }

@@ -24,9 +24,14 @@ final class Config {
             merged["sponsorblock_uuid"] = UUID().uuidString.lowercased()
         }
 
+        if merged["airplay_mode"] == nil { merged["airplay_mode"] = true }
+
         values = merged
         save()
     }
+
+    /// whether the TV interface should move to a connected HDMI / AirPlay display ("AirPlay / HDMI Display" in the settings)
+    var airplayMode: Bool { (values["airplay_mode"] as? Bool) ?? true }
 
     var json: String {
         guard let data = try? JSONSerialization.data(withJSONObject: values),

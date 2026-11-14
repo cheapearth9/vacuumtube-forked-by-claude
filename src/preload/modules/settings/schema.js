@@ -131,6 +131,7 @@ module.exports = (locale) => [
                     { type: 'info', title: 'Player Volume', value: (config) => (typeof config.volume === 'number' ? config.volume : 100) + '%', hide: !window.AndroidBridge },
                     { type: 'button', title: 'Volume +5', run: () => window.__vtVolumeStep?.(5), hide: !window.AndroidBridge },
                     { type: 'button', title: 'Volume -5', run: () => window.__vtVolumeStep?.(-5), hide: !window.AndroidBridge },
+                    { type: 'toggle', key: 'airplay_mode', title: 'AirPlay / HDMI Display', description: 'Shows the TV interface on a connected HDMI or AirPlay screen, with this device as the remote. Off keeps it on this device', hide: !window.__vtNative },
                     { type: 'toggle', key: 'debug_info', title: 'Debug Info', description: 'Shows version and error messages on screen, useful for bug reports', hide: !window.AndroidBridge }
                 ]
             },

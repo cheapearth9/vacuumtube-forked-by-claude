@@ -92,20 +92,67 @@ final class TVHost: NSObject {
 
     // MARK: external display
 
-    func attachExternal(window: UIWindow, container: UIView) {
+    /// the monitor's scene, kept while it is connected. Like AirBrowser, nothing is drawn on it until it is wanted.
+    private var externalScene: UIWindowScene?
+
+    func externalSceneConnected(_ scene: UIWindowScene) {
+        externalScene = scene
+        report("external scene connected")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in self?.updatePresentation() }
+    }
+
+    func externalSceneDisconnected(_ scene: UIWindowScene) {
+        if let current = externalScene, current !== scene { return } // a stale scene after a quick replug
+        stopPresentation()
+        externalScene = nil
+        report("external scene disconnected")
+    }
+
+    /// shows the TV interface on the monitor when there is one and "AirPlay / HDMI Display" is on, otherwise on the phone
+    func updatePresentation() {
+        if config.airplayMode, externalScene != nil { startPresentation() } else { stopPresentation() }
+    }
+
+    private func startPresentation() {
+        guard externalWindow == nil, let scene = externalScene else { return }
+
+        scene.screen.overscanCompensation = .none // use every pixel of the monitor
+
+        let controller = UIViewController()
+        controller.view.backgroundColor = .black
+
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = controller
+        window.isHidden = false // not makeKeyAndVisible: the phone keeps keyboard focus
         externalWindow = window
-        place(webView, in: container)
+
+        place(webView, in: controller.view)
         webView.isUserInteractionEnabled = false // on the tv screen nobody can touch it; the phone becomes the remote
+        nudgeLayout()
         onDisplayChange?()
     }
 
-    func detachExternal(window: UIWindow) {
-        guard externalWindow === window else { return }
+    private func stopPresentation() {
+        guard let window = externalWindow else { return }
+
+        window.isHidden = true
+        window.rootViewController = nil
         externalWindow = nil
+        externalScene?.screen.overscanCompensation = .scale
 
         if let container = phoneContainer { place(webView, in: container) }
         webView.isUserInteractionEnabled = true
+        nudgeLayout()
         onDisplayChange?()
+    }
+
+    /// youtube TV only re-measures its layout when told the window changed size
+    private func nudgeLayout() {
+        for delay in [ 0.2, 0.8, 2.0 ] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.webView.evaluateJavaScript("window.dispatchEvent(new Event('resize'))", completionHandler: nil)
+            }
+        }
     }
 
     func showOnPhoneIfNeeded() {
@@ -319,7 +366,11 @@ extension TVHost: WKScriptMessageHandler {
 
         switch action {
         case "setConfig":
-            if let text = body["config"] as? String { config.replace(withJSON: text) }
+            if let text = body["config"] as? String {
+                let wasOn = config.airplayMode
+                config.replace(withJSON: text)
+                if config.airplayMode != wasOn { updatePresentation() } // the settings toggle
+            }
         case "reload":
             loadTV()
         case "open":
