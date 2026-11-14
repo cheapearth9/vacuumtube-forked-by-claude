@@ -4,7 +4,7 @@ An unofficial Android TV port of [VacuumTube](https://github.com/shy1132/VacuumT
 
 It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen WebView, so you get the normal TV layout with **no ads and no SmartTube-style third-party client**, plus VacuumTube's own settings menu.
 
-> This fork only adds the Android app (everything under [`android/`](android)). The VacuumTube code that does the real work, the ad blocker and the settings menu, is upstream's and is used unchanged. All credit for it goes to [shy1132/VacuumTube](https://github.com/shy1132/VacuumTube). The original desktop README is [here](https://github.com/shy1132/VacuumTube#readme).
+> This fork only adds the Android app (everything under [`android/`](android)) and the iOS app (under [`ios/`](ios)). The VacuumTube code that does the real work, the ad blocker and the settings menu, is upstream's and is used unchanged. All credit for it goes to [shy1132/VacuumTube](https://github.com/shy1132/VacuumTube). The original desktop README is [here](https://github.com/shy1132/VacuumTube#readme).
 
 ## Install
 
@@ -22,6 +22,27 @@ It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen We
 - Press **Menu** (or the **Settings** key) on the remote to open VacuumTube's settings directly.
 - A few seconds after launch, a small message shows the app version, Android and WebView versions, and whether VacuumTube's scripts are running. If something misbehaves, a photo of it tells what's wrong.
 - Devices without hardware VP9 or AV1 decoding automatically get H.264-only playback (change it in VacuumTube settings). "Low memory mode" is off by default everywhere; it is available in settings under Advanced.
+
+## VacuumTube for iOS (experimental)
+
+An iPhone / iPad version of the same thing. **Plug in an HDMI adapter or start AirPlay, and the YouTube TV interface appears on that screen by itself**, with no toggle. The phone becomes the remote (D-pad, OK, Back, play/pause, VacuumTube settings), and an external keyboard works too (arrows, Return = OK, Esc = Back, Space, typing in search, Ctrl+O for VacuumTube's settings). With no external display connected, the TV interface fills the phone, and a tap shows the remote. Mouse and trackpad are not supported.
+
+**Install with AltStore or SideStore:** add this source, then install VacuumTube from it. New builds then show up as updates in AltStore.
+
+```
+https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/ios-latest/altstore.json
+```
+
+Or download `VacuumTube-iOS.ipa` from the [**ios-latest** release](../../releases/tag/ios-latest) and sideload it any way you like. The IPA is unsigned: AltStore (or another sideloading tool) signs it with your Apple ID, which with a free account has to be renewed every 7 days. The app has no updater of its own; AltStore does that.
+
+Same features as the Android app: ad blocking, VacuumTube's settings menu, SponsorBlock, DeArrow, Return YouTube Dislike, and so on. Not available: casting *to* the app (DIAL), and quitting from inside the app (iOS apps don't quit themselves).
+
+Things to know before trying it:
+
+- **Untested on a real device so far.** It builds, and its scripts are tested in a desktop browser, but nobody has run it on an iPhone yet. Expect rough edges and please report what you see.
+- **iPhone needs iOS 17.1 or newer for video.** YouTube's player needs Media Source Extensions, which iPhones only got in iOS 17.1 (iPads have had them longer). Older iOS versions can open the app, but videos will not play.
+- No Widevine DRM on iOS, so movies and other protected videos won't play (the same as desktop VacuumTube). Guest accounts should work.
+- iOS plays video in WebKit's own player, so codec choices (VP9 / AV1) depend on what your device supports; use VacuumTube settings to change them.
 
 ## What works
 
