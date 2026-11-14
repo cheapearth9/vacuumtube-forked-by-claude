@@ -3,11 +3,12 @@ name: VacuumTube
 options:
   bundleIdPrefix: io.github.cheapearth9
   deploymentTarget:
-    iOS: "15.0"
+    iOS: "17.0"
 targets:
   VacuumTube:
     type: application
     platform: iOS
+    deploymentTarget: "17.0"
     sources:
       - path: VacuumTube
     settings:
