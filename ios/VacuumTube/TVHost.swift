@@ -63,47 +63,20 @@ final class TVHost: NSObject {
     }
 
     func start() {
-        NotificationCenter.default.addObserver(self, selector: #selector(screensChanged), name: UIScreen.didConnectNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(screensChanged), name: UIScreen.didDisconnectNotification, object: nil)
-        screensChanged()
         loadTV()
     }
 
     // MARK: external display
 
-    @objc private func screensChanged() {
-        if let screen = UIScreen.screens.first(where: { $0 !== UIScreen.main }) {
-            attach(to: screen)
-        } else {
-            detach()
-        }
-    }
-
-    private func attach(to screen: UIScreen) {
-        if let window = externalWindow, window.screen === screen { return }
-
-        screen.overscanCompensation = .none
-
-        let window = UIWindow(frame: screen.bounds)
-        window.screen = screen
-        let controller = UIViewController()
-        controller.view.backgroundColor = .black
-        window.rootViewController = controller
-        window.isHidden = false
+    func attachExternal(window: UIWindow, container: UIView) {
         externalWindow = window
-
-        place(webView, in: controller.view)
+        place(webView, in: container)
         webView.isUserInteractionEnabled = false // on the tv screen nobody can touch it; the phone becomes the remote
         onDisplayChange?()
     }
 
-    private func detach() {
-        guard let window = externalWindow else {
-            if webView.superview == nil, let container = phoneContainer { place(webView, in: container) }
-            return
-        }
-
-        window.isHidden = true
+    func detachExternal(window: UIWindow) {
+        guard externalWindow === window else { return }
         externalWindow = nil
 
         if let container = phoneContainer { place(webView, in: container) }
