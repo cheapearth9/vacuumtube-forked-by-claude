@@ -50,9 +50,9 @@ final class TVHost: NSObject {
         webView.customUserAgent = userAgent
         webView.backgroundColor = .black
         webView.scrollView.backgroundColor = .black
-        webView.scrollView.isScrollEnabled = false
+        webView.scrollView.bounces = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
-        webView.isUserInteractionEnabled = false // keyboard and remote only, no touch or mouse
+        webView.isUserInteractionEnabled = true // touch on the phone's own screen shows upstream's on-screen arrows / back / ok (touch-support.js)
         if #available(iOS 16.4, *) { webView.isInspectable = true }
 
         super.init()
@@ -93,6 +93,7 @@ final class TVHost: NSObject {
         externalWindow = window
 
         place(webView, in: controller.view)
+        webView.isUserInteractionEnabled = false // on the tv screen nobody can touch it; the phone becomes the remote
         onDisplayChange?()
     }
 
@@ -106,6 +107,7 @@ final class TVHost: NSObject {
         externalWindow = nil
 
         if let container = phoneContainer { place(webView, in: container) }
+        webView.isUserInteractionEnabled = true
         onDisplayChange?()
     }
 

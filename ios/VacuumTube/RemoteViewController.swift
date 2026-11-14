@@ -1,7 +1,8 @@
 import UIKit
 
 /// The phone's own screen. With an external display connected, the TV interface is on that display and this is a remote
-/// (plus a keyboard receiver). Without one, the TV interface fills the phone, and a tap shows or hides the remote.
+/// (plus a keyboard receiver). Without one, the TV interface fills the phone and the page's own touch controls (arrows,
+/// back and ok, from upstream's touch-support.js) appear when it is touched.
 final class RemoteViewController: UIViewController {
     struct Key {
         let key: String
@@ -24,7 +25,6 @@ final class RemoteViewController: UIViewController {
     private let statusLabel = UILabel()
 
     private var remoteButtons: [UIButton: Key] = [:]
-    private var showRemote = false
     private var held: [ObjectIdentifier: Key] = [:]
     private var repeatTimer: Timer?
 
@@ -57,7 +57,10 @@ final class RemoteViewController: UIViewController {
         host.showOnPhoneIfNeeded()
         host.onDisplayChange = { [weak self] in self?.refresh() }
 
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapped)))
+        // touching the page can make the web view grab the keyboard: take it back, so keys always arrive the same way
+        let touch = UITapGestureRecognizer(target: self, action: #selector(touched))
+        touch.cancelsTouchesInView = false
+        view.addGestureRecognizer(touch)
         NotificationCenter.default.addObserver(self, selector: #selector(becomeReceiver), name: UIApplication.didBecomeActiveNotification, object: nil)
         refresh()
     }
@@ -146,17 +149,13 @@ final class RemoteViewController: UIViewController {
 
     private func refresh() {
         let external = host.externalWindow != nil
-        statusLabel.text = external
-            ? "VacuumTube is on your TV display.\nThis screen is the remote. A keyboard works too."
-            : "Tap anywhere to hide the remote.\nConnect an HDMI or AirPlay display to put YouTube on it."
-        panel.isHidden = !(external || showRemote)
+        statusLabel.text = "VacuumTube is on your TV display.\nThis screen is the remote. A keyboard works too."
+        panel.isHidden = !external // without a display, the page's own touch controls do the job
         view.setNeedsLayout()
     }
 
-    @objc private func tapped() {
-        guard host.externalWindow == nil else { return } // the remote is always up while a display is connected
-        showRemote.toggle()
-        refresh()
+    @objc private func touched() {
+        DispatchQueue.main.async { [weak self] in self?.becomeFirstResponder() }
     }
 
     // MARK: remote buttons
