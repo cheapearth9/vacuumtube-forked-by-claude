@@ -25,7 +25,7 @@ It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen We
 
 ## VacuumTube for iOS (experimental)
 
-An iPhone / iPad version of the same thing. **Plug in an HDMI adapter or start AirPlay, and the YouTube TV interface appears on that screen by itself**, with no toggle. The phone becomes the remote (D-pad, OK, Back, play/pause, VacuumTube settings), and an external keyboard works too (arrows, Return = OK, Esc = Back, Space, typing in search, Ctrl+O for VacuumTube's settings). With no external display connected, the TV interface fills the phone, and touching the screen shows the same on-screen arrows, Back and OK as the original VacuumTube (turn them off with "Touch Overlay" in settings). Mouse and trackpad are not supported.
+An iPhone / iPad version of the same thing. **Plug in an HDMI adapter or start AirPlay, and the YouTube TV interface appears on that screen by itself**, with no toggle. The phone becomes the remote, drawn like the original VacuumTube's touch controls (round arrow buttons at the bottom left, Back and OK at the bottom right, plus play/pause and VacuumTube settings at the top), and an external keyboard works too (arrows, Return = OK, Esc = Back, Space, typing in search, Ctrl+O for VacuumTube's settings). With no external display connected, the TV interface fills the phone, and touching the screen shows the same on-screen arrows, Back and OK as the original VacuumTube (turn them off with "Touch Overlay" in settings). Mouse and trackpad are not supported.
 
 **Install with AltStore or SideStore:** add this source, then install VacuumTube from it. New builds then show up as updates in AltStore.
 

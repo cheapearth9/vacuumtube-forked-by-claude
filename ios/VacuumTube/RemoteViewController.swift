@@ -77,79 +77,116 @@ final class RemoteViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         panel.frame = view.bounds
+        layoutRemote()
     }
+
+    // the original VacuumTube's touch controls (touch-support.js): round dark buttons, the four arrows in a row at the bottom
+    // left, back and ok at the bottom right
+    private var leftCluster: [UIButton] = []   // left, right, up, down (the same order as upstream)
+    private var rightCluster: [UIButton] = []  // back, ok
+    private let settingsKey = UIButton(type: .system)
+    private let playKey = UIButton(type: .system)
 
     private func buildPanel() {
-        panel.backgroundColor = UIColor.black.withAlphaComponent(0.85)
+        panel.backgroundColor = .black
         panel.autoresizingMask = [ .flexibleWidth, .flexibleHeight ]
 
-        statusLabel.textColor = .white
+        statusLabel.textColor = UIColor(white: 1, alpha: 0.7)
         statusLabel.textAlignment = .center
         statusLabel.numberOfLines = 0
-        statusLabel.font = .preferredFont(forTextStyle: .headline)
+        statusLabel.font = .preferredFont(forTextStyle: .body)
+        panel.addSubview(statusLabel)
 
-        let rows = UIStackView(arrangedSubviews: [
-            statusLabel,
-            row([ spacer(), button("▲", Self.up), spacer() ]),
-            row([ button("◀", Self.left), button("OK", Self.enter), button("▶", Self.right) ]),
-            row([ spacer(), button("▼", Self.down), spacer() ]),
-            row([ button("Back", Self.escape), button("⏯", Self.playPause), settingsButton() ])
-        ])
-        rows.axis = .vertical
-        rows.spacing = 14
-        rows.alignment = .fill
-        rows.translatesAutoresizingMaskIntoConstraints = false
-        panel.addSubview(rows)
+        leftCluster = [
+            round(symbol: "chevron.left", Self.left),
+            round(symbol: "chevron.right", Self.right),
+            round(symbol: "chevron.up", Self.up),
+            round(symbol: "chevron.down", Self.down)
+        ]
+        rightCluster = [
+            round(text: "◦", size: 0.7, Self.escape),  // back
+            round(text: "·", size: 1.2, Self.enter)    // ok
+        ]
 
-        NSLayoutConstraint.activate([
-            rows.centerYAnchor.constraint(equalTo: panel.centerYAnchor),
-            rows.centerXAnchor.constraint(equalTo: panel.centerXAnchor),
-            rows.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
-            rows.leadingAnchor.constraint(greaterThanOrEqualTo: panel.leadingAnchor, constant: 20),
-            rows.trailingAnchor.constraint(lessThanOrEqualTo: panel.trailingAnchor, constant: -20)
-        ])
+        for b in leftCluster + rightCluster { panel.addSubview(b) }
+
+        // not in upstream's overlay, but the phone is the only remote there is
+        for (b, symbol) in [ (settingsKey, "gearshape"), (playKey, "playpause.fill") ] {
+            b.setImage(UIImage(systemName: symbol), for: .normal)
+            b.tintColor = .white
+            b.backgroundColor = UIColor(red: 0.153, green: 0.153, blue: 0.153, alpha: 0.9)
+            panel.addSubview(b)
+        }
+
+        settingsKey.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
+        remoteButtons[playKey] = Self.playPause
+        playKey.addTarget(self, action: #selector(buttonDown(_:)), for: .touchDown)
+        playKey.addTarget(self, action: #selector(buttonUp(_:)), for: [ .touchUpInside, .touchUpOutside, .touchCancel ])
     }
 
-    private func row(_ views: [UIView]) -> UIStackView {
-        let stack = UIStackView(arrangedSubviews: views)
-        stack.axis = .horizontal
-        stack.spacing = 14
-        stack.distribution = .fillEqually
-        stack.heightAnchor.constraint(equalToConstant: 64).isActive = true
-        return stack
+    private func layoutRemote() {
+        let bounds = panel.bounds
+        let margin = max(bounds.height * 0.05, 16)
+        let gap = max(bounds.width * 0.01, 8)
+
+        // 10% of the width like upstream, as large as the screen lets six of them fit
+        let fit = (bounds.width - margin * 2 - gap * 7) / 6
+        let d = max(52, min(max(64, bounds.width * 0.1), fit))
+        let bottom = bounds.height - margin - view.safeAreaInsets.bottom * 0.5
+
+        for (i, b) in leftCluster.enumerated() {
+            b.frame = CGRect(x: margin + CGFloat(i) * (d + gap), y: bottom - d, width: d, height: d)
+            b.layer.cornerRadius = d / 2
+        }
+
+        for (i, b) in rightCluster.reversed().enumerated() { // ok is the right-most
+            b.frame = CGRect(x: bounds.width - margin - d - CGFloat(i) * (d + gap), y: bottom - d, width: d, height: d)
+            b.layer.cornerRadius = d / 2
+        }
+
+        let small = d * 0.6
+        playKey.frame = CGRect(x: bounds.width - margin - small, y: margin + view.safeAreaInsets.top, width: small, height: small)
+        settingsKey.frame = CGRect(x: playKey.frame.minX - gap - small, y: playKey.frame.minY, width: small, height: small)
+        playKey.layer.cornerRadius = small / 2
+        settingsKey.layer.cornerRadius = small / 2
+
+        statusLabel.frame = CGRect(x: margin, y: margin + view.safeAreaInsets.top, width: max(0, settingsKey.frame.minX - margin * 2), height: small)
     }
 
-    private func spacer() -> UIView { UIView() }
-
-    private func styled(_ title: String) -> UIButton {
-        let b = UIButton(type: .system)
-        b.setTitle(title, for: .normal)
-        b.titleLabel?.font = .systemFont(ofSize: 22, weight: .semibold)
+    private func roundStyle(_ b: UIButton) {
+        b.backgroundColor = UIColor(red: 0.153, green: 0.153, blue: 0.153, alpha: 0.9) // #272727
+        b.tintColor = .white
         b.setTitleColor(.white, for: .normal)
-        b.backgroundColor = UIColor(white: 1, alpha: 0.18)
-        b.layer.cornerRadius = 14
+    }
+
+    private func round(symbol: String, _ key: Key) -> UIButton {
+        let b = UIButton(type: .system)
+        b.setImage(UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 30, weight: .bold)), for: .normal)
+        roundStyle(b)
+        wire(b, key)
         return b
     }
 
-    private func button(_ title: String, _ key: Key) -> UIButton {
-        let b = styled(title)
+    private func round(text: String, size: CGFloat, _ key: Key) -> UIButton {
+        let b = UIButton(type: .system)
+        b.setTitle(text, for: .normal)
+        b.titleLabel?.font = .systemFont(ofSize: 44 * size, weight: .bold)
+        roundStyle(b)
+        wire(b, key)
+        return b
+    }
+
+    private func wire(_ b: UIButton, _ key: Key) {
         remoteButtons[b] = key
         b.addTarget(self, action: #selector(buttonDown(_:)), for: .touchDown)
         b.addTarget(self, action: #selector(buttonUp(_:)), for: [ .touchUpInside, .touchUpOutside, .touchCancel ])
-        return b
-    }
-
-    private func settingsButton() -> UIButton {
-        let b = styled("⚙︎")
-        b.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
-        return b
     }
 
     // MARK: state
 
     private func refresh() {
         let external = host.externalWindow != nil
-        statusLabel.text = "VacuumTube is on your TV display.\nThis screen is the remote. A keyboard works too."
+        statusLabel.text = "VacuumTube is on your TV display. A keyboard works too."
         panel.isHidden = !external // without a display, the page's own touch controls do the job
         view.setNeedsLayout()
     }
