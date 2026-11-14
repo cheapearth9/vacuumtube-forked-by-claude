@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15 # the same runner AirBrowser (whose external display works) is built on
     steps:
       - uses: actions/checkout@v4
 

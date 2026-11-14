@@ -18,9 +18,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    // an external display (HDMI or AirPlay) arrives as its own scene; the role's name changed in ios 16, so go by the text
+    // the scene's role (phone screen or external display) picks which entry of Info.plist is used; the delegate looks at the role again
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        let external = connectingSceneSession.role.rawValue.contains("ExternalDisplay")
-        return UISceneConfiguration(name: external ? "External" : "Phone", sessionRole: connectingSceneSession.role)
+        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 }
