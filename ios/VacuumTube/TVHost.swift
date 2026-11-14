@@ -63,7 +63,31 @@ final class TVHost: NSObject {
     }
 
     func start() {
+        // what ios offers for external displays, shown by the on-screen diagnostics when "Debug Info" is on
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(displayEvent(_:)), name: UIScene.willConnectNotification, object: nil)
+        center.addObserver(self, selector: #selector(displayEvent(_:)), name: UIScene.didDisconnectNotification, object: nil)
+        center.addObserver(self, selector: #selector(displayEvent(_:)), name: UIScreen.didConnectNotification, object: nil)
+        center.addObserver(self, selector: #selector(displayEvent(_:)), name: UIScreen.didDisconnectNotification, object: nil)
         loadTV()
+    }
+
+    private var displayLog: [String] = []
+
+    @objc private func displayEvent(_ note: Notification) {
+        var detail = note.name.rawValue.replacingOccurrences(of: "Notification", with: "")
+        if let scene = note.object as? UIScene { detail += " " + scene.session.role.rawValue }
+        if let screen = note.object as? UIScreen { detail += " \(Int(screen.bounds.width))x\(Int(screen.bounds.height))" }
+        report(detail)
+    }
+
+    /// writes a line about screens / scenes into the page's diagnostics (visible only with Debug Info on)
+    func report(_ line: String) {
+        let screens = UIScreen.screens.map { "\(Int($0.bounds.width))x\(Int($0.bounds.height))" + ($0.mirrored != nil ? " mirrored" : "") }
+        let scenes = UIApplication.shared.connectedScenes.map { $0.session.role.rawValue.replacingOccurrences(of: "UIWindowSceneSessionRole", with: "") }
+        let text = "display: \(line) | screens: \(screens.joined(separator: ", ")) | scenes: \(scenes.joined(separator: ", ")) | iOS \(UIDevice.current.systemVersion), \(UIDevice.current.model)"
+        displayLog.append(text)
+        webView.evaluateJavaScript("window.__vtDiag && window.__vtDiag(\(Self.literal(text)))", completionHandler: nil)
     }
 
     // MARK: external display
@@ -255,6 +279,9 @@ extension TVHost: WKNavigationDelegate, WKUIDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         injecting = false
+
+        // the page's diagnostics aren't up for a moment: report the current state then
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in self?.report("status") }
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
