@@ -3,7 +3,7 @@ name: AltStore source (all apps)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '*/15 * * * *'
   workflow_run:
     workflows: ['iOS IPA']
     types: [completed]
