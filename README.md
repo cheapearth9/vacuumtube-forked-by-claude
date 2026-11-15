@@ -23,15 +23,16 @@ It opens the regular YouTube TV interface (`youtube.com/tv`) in a full-screen We
 - A few seconds after launch, a small message shows the app version, Android and WebView versions, and whether VacuumTube's scripts are running. If something misbehaves, a photo of it tells what's wrong.
 - Devices without hardware VP9 or AV1 decoding automatically get H.264-only playback (change it in VacuumTube settings). "Low memory mode" is off by default everywhere; it is available in settings under Advanced.
 
-## AltStore / SideStore source for all my iOS apps
+## AltStore / SideStore sources
 
-One source that lists every IPA I build on GitHub (VacuumTube for iOS and AirBrowser). In AltStore or SideStore choose **Sources → +** and paste:
+Two sources, add whichever you want (AltStore or SideStore: **Sources → +**, paste the link). Use one or the other, not both, since VacuumTube is in each.
 
-```
-https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/altsource/altsource.json
-```
+| Source | Contains | Link |
+| --- | --- | --- |
+| VacuumTube only | VacuumTube for iOS | `https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/ios-latest/altstore.json` |
+| All my apps | VacuumTube, AirBrowser and any other iOS app I build | `https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/altsource/altsource.json` |
 
-It refreshes itself every few hours and after each VacuumTube iOS build. Any new repo of mine whose CI publishes an `.ipa` to a release tagged `ios-latest` is added automatically. The VacuumTube-only source from the iOS section below still works as well.
+The all-apps source refreshes itself every few hours and after each VacuumTube iOS build. Any new repo of mine whose CI publishes an `.ipa` to a release tagged `ios-latest` is added automatically.
 
 ## VacuumTube for iOS (experimental)
 
