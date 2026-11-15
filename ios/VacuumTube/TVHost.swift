@@ -118,6 +118,9 @@ final class TVHost: NSObject {
 
         scene.screen.overscanCompensation = .none // use every pixel of the monitor
 
+        // iOS may pick a low resolution for the monitor (mirroring style): ask for the sharpest mode with the monitor's own shape
+        if let best = Self.bestMode(for: scene.screen), scene.screen.currentMode != best { scene.screen.currentMode = best }
+
         let controller = UIViewController()
         controller.view.backgroundColor = .black
 
@@ -130,6 +133,22 @@ final class TVHost: NSObject {
         webView.isUserInteractionEnabled = false // on the tv screen nobody can touch it; the phone becomes the remote
         nudgeLayout()
         onDisplayChange?()
+    }
+
+    private static func bestMode(for screen: UIScreen) -> UIScreenMode? {
+        let modes = screen.availableModes
+        guard !modes.isEmpty else { return nil }
+
+        var candidates = modes
+        if let preferred = screen.preferredMode, preferred.size.height > 0 {
+            let shape = preferred.size.width / preferred.size.height
+            let sameShape = modes.filter { $0.size.height > 0 && abs($0.size.width / $0.size.height - shape) < 0.02 }
+            if !sameShape.isEmpty { candidates = sameShape }
+        }
+
+        let upTo4K = candidates.filter { $0.size.width <= 3840 }
+        let pool = upTo4K.isEmpty ? candidates : upTo4K
+        return pool.max { $0.size.width * $0.size.height < $1.size.width * $1.size.height }
     }
 
     private func stopPresentation() {

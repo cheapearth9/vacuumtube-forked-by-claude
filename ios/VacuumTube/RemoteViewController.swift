@@ -79,6 +79,9 @@ final class RemoteViewController: UIViewController {
         panel.frame = view.bounds
     }
 
+    private var buttonHeight: CGFloat = 64
+    private var buttonFont: CGFloat = 22
+
     private func buildPanel() {
         panel.backgroundColor = UIColor.black.withAlphaComponent(0.85)
         panel.autoresizingMask = [ .flexibleWidth, .flexibleHeight ]
@@ -88,6 +91,10 @@ final class RemoteViewController: UIViewController {
         statusLabel.numberOfLines = 0
         statusLabel.font = .preferredFont(forTextStyle: .headline)
 
+        let big = UIDevice.current.userInterfaceIdiom == .pad
+        buttonHeight = big ? 104 : 64
+        buttonFont = big ? 36 : 22
+
         let rows = UIStackView(arrangedSubviews: [
             statusLabel,
             row([ UIView(), button("▲", Self.up), UIView() ]),
@@ -96,7 +103,7 @@ final class RemoteViewController: UIViewController {
             row([ button("Back", Self.escape), button("⏯", Self.playPause), settingsButton() ])
         ])
         rows.axis = .vertical
-        rows.spacing = 14
+        rows.spacing = big ? 20 : 14
         rows.alignment = .fill
         rows.translatesAutoresizingMaskIntoConstraints = false
         panel.addSubview(rows)
@@ -104,7 +111,7 @@ final class RemoteViewController: UIViewController {
         NSLayoutConstraint.activate([
             rows.centerYAnchor.constraint(equalTo: panel.centerYAnchor),
             rows.centerXAnchor.constraint(equalTo: panel.centerXAnchor),
-            rows.widthAnchor.constraint(lessThanOrEqualToConstant: 420),
+            rows.widthAnchor.constraint(lessThanOrEqualToConstant: big ? 640 : 420),
             rows.leadingAnchor.constraint(greaterThanOrEqualTo: panel.leadingAnchor, constant: 20),
             rows.trailingAnchor.constraint(lessThanOrEqualTo: panel.trailingAnchor, constant: -20)
         ])
@@ -113,19 +120,19 @@ final class RemoteViewController: UIViewController {
     private func row(_ views: [UIView]) -> UIStackView {
         let stack = UIStackView(arrangedSubviews: views)
         stack.axis = .horizontal
-        stack.spacing = 14
+        stack.spacing = buttonHeight > 80 ? 20 : 14
         stack.distribution = .fillEqually
-        stack.heightAnchor.constraint(equalToConstant: 64).isActive = true
+        stack.heightAnchor.constraint(equalToConstant: buttonHeight).isActive = true
         return stack
     }
 
     private func styled(_ title: String) -> UIButton {
         let b = UIButton(type: .system)
         b.setTitle(title, for: .normal)
-        b.titleLabel?.font = .systemFont(ofSize: 22, weight: .semibold)
+        b.titleLabel?.font = .systemFont(ofSize: buttonFont, weight: .semibold)
         b.setTitleColor(.white, for: .normal)
         b.backgroundColor = UIColor(white: 1, alpha: 0.18)
-        b.layer.cornerRadius = 14
+        b.layer.cornerRadius = buttonHeight / 4
         return b
     }
 

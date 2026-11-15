@@ -497,3 +497,4 @@ styles the frame and the generic row types from render.js only
 /*bigger on big screens (tv / monitor); a phone or tablet keeps the normal size*/
 @media (min-width: 1281px) { #vt-settings-overlay-root { --vt-zoom: 1.5; } }
 @media (min-width: 1900px) { #vt-settings-overlay-root { --vt-zoom: 1.8; } }
+@media (min-width: 2800px) { #vt-settings-overlay-root { --vt-zoom: 2.8; } }
