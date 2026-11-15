@@ -16,13 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
       - name: Build the combined source
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node altsource/make.mjs > altsource.json && cat altsource.json
+        run: python3 altsource/make.py > altsource.json && cat altsource.json
       - name: Publish it
         env:
           GH_TOKEN: ${{ github.token }}

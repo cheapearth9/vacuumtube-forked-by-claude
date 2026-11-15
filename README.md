@@ -31,7 +31,7 @@ One source that lists every IPA I build on GitHub (VacuumTube for iOS and AirBro
 https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/altsource/altsource.json
 ```
 
-It refreshes itself every few hours and after each VacuumTube iOS build. The VacuumTube-only source from the iOS section below still works as well.
+It refreshes itself every few hours and after each VacuumTube iOS build. Any new repo of mine whose CI publishes an `.ipa` to a release tagged `ios-latest` is added automatically. The VacuumTube-only source from the iOS section below still works as well.
 
 ## VacuumTube for iOS (experimental)
 
