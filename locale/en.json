@@ -184,6 +184,18 @@
             "title": "Default Guest Mode",
             "description": "Automatically enter guest mode on launch"
         },
+        "screensaver_enabled": {
+            "title": "Screensaver Dimmer",
+            "description": "Dims the screen after a period of inactivity when menus are idle or video is paused"
+        },
+        "screensaver_timeout": {
+            "title": "Dim After",
+            "description": "How long VacuumTube waits without any input before dimming"
+        },
+        "screensaver_dim_percentage": {
+            "title": "Dimming Level",
+            "description": "How dark the screen gets. 100% turns it fully black"
+        },
         "features": {
             "title": "Features",
             "notice_title": "Not part of the default experience",
