@@ -17,6 +17,11 @@ on:
 permissions:
   contents: write
 
+# a newer push replaces a build that is still queued or running, so the macOS queue is not spent on old commits
+concurrency:
+  group: ios-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-15 # the same runner AirBrowser (whose external display works) is built on
