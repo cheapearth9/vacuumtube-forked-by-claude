@@ -100,7 +100,8 @@ final class RemoteViewController: UIViewController {
             row([ UIView(), button("▲", Self.up), UIView() ]),
             row([ button("◀", Self.left), button("OK", Self.enter), button("▶", Self.right) ]),
             row([ UIView(), button("▼", Self.down), UIView() ]),
-            row([ button("Back", Self.escape), button("⏯", Self.playPause), settingsButton() ])
+            row([ button("Back", Self.escape), button("⏯", Self.playPause), settingsButton() ]),
+            row([ volumeButton("🔉 −", -5), volumeButton("🔊 +", 5) ])
         ])
         rows.axis = .vertical
         rows.spacing = big ? 20 : 14
@@ -141,6 +142,12 @@ final class RemoteViewController: UIViewController {
         remoteButtons[b] = key
         b.addTarget(self, action: #selector(buttonDown(_:)), for: .touchDown)
         b.addTarget(self, action: #selector(buttonUp(_:)), for: [ .touchUpInside, .touchUpOutside, .touchCancel ])
+        return b
+    }
+
+    private func volumeButton(_ title: String, _ delta: Int) -> UIButton {
+        let b = styled(title)
+        b.addAction(UIAction { [weak self] _ in self?.host.changeVolume(delta) }, for: .touchUpInside)
         return b
     }
 

@@ -193,6 +193,11 @@ final class TVHost: NSObject {
         webView.evaluateJavaScript(script, completionHandler: nil)
     }
 
+    /// the player volume (volume.js); delta in percent
+    func changeVolume(_ delta: Int) {
+        webView.evaluateJavaScript("window.__vtVolumeStep && window.__vtVolumeStep(\(delta))", completionHandler: nil)
+    }
+
     func toggleSettings() {
         webView.evaluateJavaScript("window.vtToggleSettingsOverlay && window.vtToggleSettingsOverlay()", completionHandler: nil)
     }
