@@ -32,7 +32,7 @@ Two sources, add whichever you want (AltStore or SideStore: **Sources → +**, p
 | VacuumTube only | VacuumTube for iOS | `https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/ios-latest/altstore.json` |
 | All my apps | VacuumTube, AirBrowser and any other iOS app I build | `https://github.com/cheapearth9/vacuumtube-forked-by-claude/releases/download/altsource/altsource.json` |
 
-The all-apps source refreshes itself about every 15 minutes (and after each VacuumTube iOS build). Any new repo of mine whose CI publishes an `.ipa` to a release tagged `ios-latest` is added automatically.
+The all-apps source refreshes itself about every 15 minutes (and after each VacuumTube iOS build). Any repo of mine whose release (tagged `ios-latest`, or just the newest release) has an `.ipa` attached is added automatically, e.g. Lumen.
 
 ## VacuumTube for iOS (experimental)
 

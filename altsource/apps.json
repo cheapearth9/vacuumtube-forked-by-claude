@@ -21,6 +21,12 @@
             "description": "A browser that can put pages on a connected HDMI or AirPlay display while the iPad or iPhone stays the controller.",
             "iconURL": "https://raw.githubusercontent.com/cheapearth9/AirBrowser/main/AirBrowser/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
             "tintColor": "#0A84FF"
+        },
+        "cheapearth9/Lumen": {
+            "subtitle": "Stream your computer to iPhone / iPad",
+            "description": "Low-latency screen streaming from a Mac, Windows or Linux PC to an iPhone or iPad over Wi-Fi or USB. Mouse, keyboard and touch input go back to the computer, with audio and an encrypted protocol. Needs the Lumen host app on the computer.",
+            "iconURL": "https://raw.githubusercontent.com/cheapearth9/Lumen/main/Client/Assets.xcassets/AppIcon.appiconset/icon-1024.png",
+            "tintColor": "#7C5CFF"
         }
     }
 }

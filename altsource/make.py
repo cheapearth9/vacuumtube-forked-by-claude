@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds one AltStore / SideStore source from every repo of the owner that has an "ios-latest" release with an .ipa in it.
+"""Builds one AltStore / SideStore source from every repo of the owner whose "ios-latest" release (or, failing that, newest release) has an .ipa in it.
 Name, bundle id, version and minimum iOS come from the IPA's Info.plist. altsource/apps.json only holds the source's own
 details plus optional per-repo overrides (icon, subtitle, description, tint, hidden repos). No edit is needed for a new repo.
 usage: python3 altsource/make.py > altsource.json    (GITHUB_TOKEN optional: raises the api rate limit)"""
@@ -41,10 +41,17 @@ for repo in sorted(repos, key=lambda r: r['name'].lower()):
     override = overrides.get(full, {})
     if repo.get('fork') or repo.get('archived') or override.get('hidden'): continue
 
-    try:
-        release = get(f'https://api.github.com/repos/{full}/releases/tags/{TAG}')
-    except Exception:
-        continue # no ios-latest release: not an iOS repo
+    # the ios-latest release, or else the newest normal release (repos that attach the ipa to version tags)
+    release = None
+    for url in (f'https://api.github.com/repos/{full}/releases/tags/{TAG}', f'https://api.github.com/repos/{full}/releases/latest'):
+        try:
+            candidate = get(url)
+        except Exception:
+            continue
+        if any(a['name'].lower().endswith('.ipa') for a in candidate.get('assets', [])):
+            release = candidate
+            break
+    if not release: continue # not an iOS repo
 
     asset = next((a for a in release['assets'] if a['name'].lower().endswith('.ipa')), None)
     if not asset: continue
