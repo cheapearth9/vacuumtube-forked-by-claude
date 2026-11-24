@@ -64,11 +64,17 @@ for repo in sorted(repos, key=lambda r: r['name'].lower()):
 
     build = (re.search(r'Build\s+(\d+)', release.get('body') or '', re.I) or [None, None])[1] or str(plist.get('CFBundleVersion', '1'))
     version = f"{plist.get('CFBundleShortVersionString', '1.0')}.{build}"
+
+    # a release made for a version tag (v1.5) is named by that tag: the app's own version field is often not bumped
+    tag = release.get('tag_name', '')
+    if tag != TAG and re.fullmatch(r'v?\d+(\.\d+)*', tag):
+        version = tag.lstrip('v')
+        build = version
     name = override.get('name') or plist.get('CFBundleDisplayName') or plist.get('CFBundleName') or repo['name']
     description = override.get('description') or repo.get('description') or name
     icon = override.get('iconURL') or f'https://github.com/{owner}.png'
     tint = override.get('tintColor') or config.get('tintColor', '#0A84FF')
-    note = f'Build {build}'
+    note = f'Version {build}' if build == version else f'Build {build}'
 
     apps.append({
         'name': name,
